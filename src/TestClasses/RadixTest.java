@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Random;
 
 import kutschke.higherClass.Lambda;
+import kutschke.higherClass.NoThrowLambda;
 import kutschke.utility.RadixSort;
 
 import org.junit.Test;
@@ -22,7 +23,7 @@ public class RadixTest {
 		Long[] array = {4L,1L,40L,35L,1342L,231L,3421L,211L,3212L,45321L,2344564L,223113L,2345L,11L,233L,2L,1L,0L, Long.MAX_VALUE};
 		List<Long> lst = Arrays.asList(4L,1L,40L,35L,1342L,231L,3421L,211L,3212L,45321L,2344564L,223113L,2345L,11L,233L,2L,1L,0L, Long.MAX_VALUE);
 		
-		RadixSort.sort(array, new Lambda<Long,Long>(){
+		RadixSort.sort(array, new NoThrowLambda<Long,Long>(){
 
 			@Override
 			public Long apply(Long arg) {
@@ -42,7 +43,7 @@ public class RadixTest {
 		List<Double> lst = Arrays.asList(0.43d, 0.431d, 1.3d, 2.1d, 0.0d, 0.1d, 1.1d, 4.3d, 5.2d, 5.1d);
 		List<Double> lst2 = Arrays.asList(0.43d, 0.431d, 1.3d, 2.1d, 0.0d, 0.1d, 1.1d, 4.3d, 5.2d, 5.1d);
 		
-		RadixSort.sort(array, new Lambda <Double,Long>(){
+		RadixSort.sort(array, new NoThrowLambda <Double,Long>(){
 
 			@Override
 			public Long apply(Double arg) {
@@ -57,7 +58,7 @@ public class RadixTest {
 		String log1 = Testing.getBufferString();
 		Testing.clearBuffer();
 				
-		RadixSort.sort(lst2, new Lambda <Double,Long>(){
+		RadixSort.sort(lst2, new NoThrowLambda <Double,Long>(){
 
 			@Override
 			public Long apply(Double arg) {
@@ -92,7 +93,7 @@ public class RadixTest {
 			lst2.add(l);
 		}
 		
-		RadixSort.sort(array, new Lambda<Double,Long>(){
+		RadixSort.sort(array, new NoThrowLambda<Double,Long>(){
 
 			@Override
 			public Long apply(Double arg) {
@@ -107,7 +108,7 @@ public class RadixTest {
 		Testing.printarray(lst.toArray());
 		Testing.printarray(array);
 		
-		RadixSort.sort(lst2, new Lambda<Double,Long>(){
+		RadixSort.sort(lst2, new NoThrowLambda<Double,Long>(){
 
 			@Override
 			public Long apply(Double arg) {

@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Utility
+Bundle-SymbolicName: Utility
+Bundle-Version: 1.0.0
+Export-Package: TestClasses,
+ interfaces,
+ kutschke.Automata,
+ kutschke.exceptions,
+ kutschke.generalStreams,
+ kutschke.generalStreams.iterators,
+ kutschke.higherClass,
+ kutschke.higherClass.Tests,
+ kutschke.interpreter,
+ kutschke.numberStreams,
+ kutschke.utility

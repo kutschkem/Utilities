@@ -4,6 +4,7 @@ import java.util.NoSuchElementException;
 
 import kutschke.generalStreams.InStream;
 import kutschke.higherClass.Lambda;
+import kutschke.higherClass.NoThrowLambda;
 
 /**
  * This class provides a more secure Iteration of the Stream because of a
@@ -57,8 +58,8 @@ public abstract class SecuredStreamIterator<E> extends StreamIterator<E> {
 	protected abstract Boolean breakCondition(E e);
 
 	public static <T> SecuredStreamIterator<T> getSecureIterator(
-			InStream<T> inStr, Lambda<T, Boolean> breakCond) {
-		final Lambda<T, Boolean> bC = breakCond;
+			InStream<T> inStr, NoThrowLambda<T, Boolean> breakCond) {
+		final NoThrowLambda<T, Boolean> bC = breakCond;
 		return new SecuredStreamIterator<T>(inStr) {
 
 			@Override

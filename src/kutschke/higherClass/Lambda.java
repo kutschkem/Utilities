@@ -19,6 +19,6 @@ public interface Lambda<ArgType, ResultType> {
 	 *            the Argument
 	 * @return the result of the Operation
 	 */
-	public ResultType apply(ArgType arg);
+	public ResultType apply(ArgType arg) throws Exception;
 
 }

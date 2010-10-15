@@ -36,7 +36,7 @@ public final class AbstractFun {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T, S extends Collection<T>> Collection<T> filter(S col,
-			Lambda<T, Boolean> op) {
+			NoThrowLambda<T, Boolean> op) {
 		if (col == null)
 			return null;
 		Collection<T> result = null;
@@ -81,7 +81,7 @@ public final class AbstractFun {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <Arg, Res, ArgCol extends Collection<Arg>> Collection<Res> map(
-			ArgCol col, Lambda<Arg, Res> op) {
+			ArgCol col, NoThrowLambda<Arg, Res> op) {
 		Collection<Res> result = null;
 		try {
 			result = col.getClass().newInstance();

@@ -6,6 +6,7 @@ import java.util.LinkedList;
 
 import kutschke.higherClass.AbstractFun;
 import kutschke.higherClass.Lambda;
+import kutschke.higherClass.NoThrowLambda;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,7 +18,7 @@ public class higherClassTests {
 		Collection<Integer> intlst = new LinkedList<Integer>(Arrays.asList(1,
 				2, 3));
 		Collection<Integer> intlst2 = AbstractFun.filter(intlst,
-				new Lambda<Integer, Boolean>() {
+				new NoThrowLambda<Integer, Boolean>() {
 					public Boolean apply(Integer i) {
 						return (i % 2) == 1;
 					}
@@ -31,7 +32,7 @@ public class higherClassTests {
 		Collection<Integer> intlst = new LinkedList<Integer>(Arrays.asList(3,
 				5, 7));
 		Collection<Boolean> boollst = AbstractFun.map(intlst,
-				new Lambda<Integer, Boolean>() {
+				new NoThrowLambda<Integer, Boolean>() {
 					@Override
 					public Boolean apply(Integer i) {
 						return i > 5;

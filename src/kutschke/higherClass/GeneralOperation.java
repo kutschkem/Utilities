@@ -1,7 +1,5 @@
 package kutschke.higherClass;
 
-import java.util.Collection;
-
 /**
  * an interface for the most general of all Operations, can be applied to any
  * amount of parameters (either in a collection or an array
@@ -12,7 +10,6 @@ import java.util.Collection;
  * @param <ResultType> the type of the results
  */
 public interface GeneralOperation<ArgType, ResultType> extends
-		Lambda<Collection<ArgType>, ResultType> {
+		Lambda<ArgType[], ResultType> {
 
-	public ResultType apply(ArgType[] args);
 }

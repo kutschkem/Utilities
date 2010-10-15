@@ -5,16 +5,17 @@ import java.util.LinkedList;
 import java.util.List;
 
 import kutschke.higherClass.Lambda;
+import kutschke.higherClass.NoThrowLambda;
 
 public class RadixSort {
 
 	final private static int base = 8;
 	
-	public static <T> void sort(T[] Objects, final Lambda<T,Long> fkt){
+	public static <T> void sort(T[] Objects, final NoThrowLambda<T,Long> fkt){
 		final int k = 1 << base;
 		for(int i = 0; i < 64/base; i++){
 			final int j = i;
-			CountingSort(Objects, new Lambda<T,Integer>(){
+			CountingSort(Objects, new NoThrowLambda<T,Integer>(){
 
 				@Override
 				public Integer apply(T arg) {
@@ -27,14 +28,14 @@ public class RadixSort {
 	
 	
 	/**
-	 * führt einen RadixSort auf einer Liste durch
+	 * fï¿½hrt einen RadixSort auf einer Liste durch
 	 * @param <T>
 	 * @param Objects
 	 * @param fkt
 	 * @see sort
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> void sort(List<T> Objects, final Lambda<T,Long> fkt){
+	public static <T> void sort(List<T> Objects, final NoThrowLambda<T,Long> fkt){
 		T[] arr = (T[]) Objects.toArray();
 		sort(arr, fkt);
 		
@@ -63,14 +64,14 @@ public class RadixSort {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static <T> void CountingSort(T[] Objects, Lambda<T,Integer> fkt, int maxBuckets){
+	private static <T> void CountingSort(T[] Objects, NoThrowLambda<T,Integer> fkt, int maxBuckets){
 		int[] counter = new int[maxBuckets];
 		for(T object :Objects){						//Anzahlen zaehlen
 			int i = fkt.apply(object);
 			counter[i]++;
 		}
 
-		for(int i = 1; i < counter.length; i++){    // kleiner-gleich Elemente zählen
+		for(int i = 1; i < counter.length; i++){    // kleiner-gleich Elemente zï¿½hlen
 			counter[i] += counter[i-1];
 		}
 
@@ -78,14 +79,14 @@ public class RadixSort {
 		System.arraycopy(Objects, 0, temp, 0, Objects.length);
 		for(int i = Objects.length -1; i >= 0; i--){
 			int j = fkt.apply((T)temp[i]);
-			counter[j]--;										// hier abziehen, da das Objekt selbst mitgezählt wurde (offset 1)
+			counter[j]--;										// hier abziehen, da das Objekt selbst mitgezï¿½hlt wurde (offset 1)
 			Objects[counter[j]] = (T) temp[i];
 		}
 			
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static <T> List<T> BucketSort(List<T> lst, Lambda<T,Integer> fkt, int maxbuckets){
+	private static <T> List<T> BucketSort(List<T> lst, NoThrowLambda<T,Integer> fkt, int maxbuckets){
 		List<T>[] lists = new LinkedList[maxbuckets];
 		for(int i=0; i < maxbuckets; i++)
 			lists[i] = new LinkedList<T>();
