@@ -9,14 +9,12 @@ import java.util.Arrays;
 public class ReflectiveFun<ResultType> implements
 		GeneralOperation<Object, ResultType> {
 
-	private Class<?> instanceClass;
 	private Method method;
 
 	public ReflectiveFun(String method, Class<?> clazz,
 			Class<?>... parameterTypes) throws SecurityException,
 			NoSuchMethodException {
 		this.method = clazz.getDeclaredMethod(method, parameterTypes);
-		this.instanceClass = clazz;
 	}
 
 	@Override
