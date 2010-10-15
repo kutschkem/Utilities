@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import kutschke.higherClass.AbstractFun;
-import kutschke.higherClass.Lambda;
 import kutschke.higherClass.NoThrowLambda;
 
 import org.junit.Assert;

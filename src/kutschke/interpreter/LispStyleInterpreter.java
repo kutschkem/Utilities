@@ -44,7 +44,7 @@ public class LispStyleInterpreter implements Interpreter {
 		if (method == null)
 			throw new SyntaxException("Unknown method " + actual.get(0));
 		Object result = null;
-		if(DEBUG)
+		if(isDEBUG())
 			System.err.println("[DEBUG]: Interpreting " + actual);
 		System.err.flush();
 		try {

@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import kutschke.higherClass.Lambda;
 import kutschke.higherClass.NoThrowLambda;
 
 public class RadixSort {

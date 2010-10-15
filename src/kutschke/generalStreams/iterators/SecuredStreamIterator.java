@@ -3,7 +3,6 @@ package kutschke.generalStreams.iterators;
 import java.util.NoSuchElementException;
 
 import kutschke.generalStreams.InStream;
-import kutschke.higherClass.Lambda;
 import kutschke.higherClass.NoThrowLambda;
 
 /**
