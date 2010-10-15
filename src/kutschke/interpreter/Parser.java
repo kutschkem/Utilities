@@ -13,6 +13,7 @@ public class Parser {
 	private char bracketOpen = '(';
 	private char bracketClose = ')';
 	private Interpreter interpreter;
+	private boolean greedy = true;
 	
 	/**
 	 * @param bracketOpen the bracketOpen to set
@@ -44,6 +45,7 @@ public class Parser {
 		int brackets = 0;
 		
 		tokenizer.parseNumbers();
+		tokenizer.wordChars('_', '_');
 		try{
 		interpreter.begin();
 		while(tokenizer.nextToken() != TT_EOF){
@@ -56,6 +58,8 @@ public class Parser {
 				if(brackets < 0)
 					throw new SyntaxException("Missing closing bracket");
 				interpreter.closeBracket();
+				if(brackets == 0 && ! greedy)
+					break;
 			}
 			else
 			switch(tokenizer.ttype){
@@ -87,6 +91,16 @@ public class Parser {
 
 	public void setInterpreter(Interpreter interpreter) {
 		this.interpreter = interpreter;
+	}
+
+
+	public boolean isGreedy() {
+		return greedy;
+	}
+
+
+	public void setGreedy(boolean greedy) {
+		this.greedy = greedy;
 	}
 	
 }

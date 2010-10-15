@@ -46,6 +46,7 @@ public class LispStyleInterpreter implements Interpreter {
 		Object result = null;
 		if(DEBUG)
 			System.err.println("[DEBUG]: Interpreting " + actual);
+		System.err.flush();
 		try {
 			result = method.apply(actual.subList(1, actual.size()).toArray());
 		} catch (Exception e) {
