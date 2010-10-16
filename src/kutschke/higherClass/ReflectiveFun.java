@@ -10,6 +10,7 @@ public class ReflectiveFun<ResultType> implements
 		GeneralOperation<Object, ResultType> {
 
 	protected Method method;
+	private Object bound;
 
 	/**
 	 * 
@@ -25,6 +26,27 @@ public class ReflectiveFun<ResultType> implements
 			NoSuchMethodException {
 		this.method = clazz.getDeclaredMethod(method, parameterTypes);
 	}
+	
+	/**
+	 * @param bound
+	 *            the bound Object to set
+	 * @throws ClassCastException
+	 *             if bound is not Compatible to the represented method
+	 */
+	public ReflectiveFun<ResultType> setBound(Object bound) {
+		this.bound = bound;
+		if (method.getDeclaringClass().isInstance(bound))
+			throw new ClassCastException(bound.getClass()
+					+ " is not compatible with " + method.getDeclaringClass());
+		return this;
+	}
+
+	/**
+	 * @return the bound Object
+	 */
+	public Object getBound() {
+		return bound;
+	}
  
 	/**
 	 * Calling a non-static method must be done by puttin the needed instance as first
@@ -37,8 +59,8 @@ public class ReflectiveFun<ResultType> implements
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		boolean isStatic = Modifier.isStatic(method.getModifiers());
 		// if the method is not static, the first parameter is NOT our instance
-		Object instance = isStatic ? null : arg[0];
-		Object[] args = Arrays.copyOfRange(arg, isStatic ? 0 : 1, arg.length);
+		Object instance = isStatic ? null : (getBound() == null ? arg[0] : getBound());
+		Object[] args = Arrays.copyOfRange(arg, isStatic || getBound() != null ? 0 : 1, arg.length);
 		// varargs
 		if (method.isVarArgs()) {
 			if (args.length > parameterTypes.length

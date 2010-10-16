@@ -14,3 +14,4 @@ Export-Package: TestClasses,
  kutschke.interpreter,
  kutschke.numberStreams,
  kutschke.utility
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

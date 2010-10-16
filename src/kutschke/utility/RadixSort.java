@@ -84,7 +84,7 @@ public class RadixSort {
 			
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "unused" })
 	private static <T> List<T> BucketSort(List<T> lst, NoThrowLambda<T,Integer> fkt, int maxbuckets){
 		List<T>[] lists = new LinkedList[maxbuckets];
 		for(int i=0; i < maxbuckets; i++)
