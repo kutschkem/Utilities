@@ -2,11 +2,13 @@ package kutschke.interpreter;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 import kutschke.higherClass.Binding;
@@ -37,34 +39,9 @@ public class LispStyleInterpreter implements Interpreter {
 	protected Deque<Map<String, GeneralOperation<Object, ?>>> scopes = new ArrayDeque<Map<String, GeneralOperation<Object, ?>>>();
 	protected List<Object> actual = null;
 	protected boolean DEBUG = false;
+	protected Map<String,Interpreter> delegates = new HashMap<String,Interpreter>();
+	protected String state = null;
 	
-	protected static final class SealableBinding extends Binding<Object,Object>{
-
-		private boolean sealed;
-
-		public void seal(){
-			sealed = true;
-		}
-		
-		public boolean isSealed(){
-			return sealed;
-		}
-		
-		public SealableBinding(GeneralOperation<Object, ? extends Object> inner) {
-			super(inner);
-		}
-		
-		@Override
-		public SealableBinding bind(int parameter, Object value){
-			if(isSealed()){
-				throw new ConcurrentModificationException("Binding sealed");
-			}
-			return (SealableBinding) super.bind(parameter, value);
-		} 
-		
-	}
-	
-
 	public Binding<Object,?> addMethod(String name, GeneralOperation<Object, ?> method) {
 		if (scopes.isEmpty())
 			scopes.push(new HashMap<String, GeneralOperation<Object, ?>>());
@@ -73,7 +50,7 @@ public class LispStyleInterpreter implements Interpreter {
 		return binding;
 	}
 
-	protected GeneralOperation<Object, ?> getMapping(String methodName) {
+	public GeneralOperation<Object, ?> getMapping(String methodName) {
 		for (Map<String, GeneralOperation<Object, ?>> scope : this.scopes) {
 			if (scope.containsKey(methodName))
 				return scope.get(methodName);
@@ -81,7 +58,7 @@ public class LispStyleInterpreter implements Interpreter {
 		return null;
 	}
 	
-	protected void optimizeMethods(){
+	protected void optimize(){
 		for(Map<String,GeneralOperation<Object,?>> map : scopes){
 			for(String method : map.keySet()){
 				GeneralOperation<Object,?> op = map.get(method);
@@ -93,17 +70,25 @@ public class LispStyleInterpreter implements Interpreter {
 				}
 			}
 		}
+		if(delegates.isEmpty())
+			delegates = Collections.emptyMap();
 	}
 
 	@Override
 	public void begin() throws SyntaxException {
-		optimizeMethods();
+		optimize();
+		if(state != null){
+			delegates.get(state).begin();
+		}
 
 	}
 
 	@Override
-	public void closeBracket() throws SyntaxException {
+	public Object closeBracket() throws SyntaxException {
 		GeneralOperation<Object, ?> method;
+		
+		if(state != null)
+			return delegates.get(state).closeBracket();
 		if(actual.get(0) instanceof GeneralOperation){
 			method = (GeneralOperation<Object, ?>) actual.get(0);
 		}
@@ -124,30 +109,47 @@ public class LispStyleInterpreter implements Interpreter {
 		actual = methodStack.pop();
 		if (actual != null)
 			actual.add(result);
+		return result;
 	}
 
 	@Override
 	public void end() throws SyntaxException {
-		// TODO Auto-generated method stub
+		if(state != null)
+			delegates.get(state).end();
 
 	}
 
 	@Override
 	public void openBracket() throws SyntaxException {
+		if(state == null){
 		methodStack.push(actual);
 		actual = new ArrayList<Object>();
+		}
+		else
+			delegates.get(state).openBracket();
 
 	}
 
 	@Override
 	public void special(char special) throws SyntaxException {
+		if(state == null)
 			actual.add(special);
+		else delegates.get(state).special(special);
 	}
 
 	@Override
 	public void token(Object t) throws SyntaxException {
+		if( actual.isEmpty() && delegates.keySet().contains(t)){
+			changeState((String) t);
+			actual = methodStack.pop();
+		}
 		actual.add(t);
-
+	}
+	
+	public void changeState(String state){
+		if(! delegates.keySet().contains(state))
+			throw new RuntimeException(state +" is not a valid state");
+		this.state = state;
 	}
 
 	public boolean isDEBUG() {

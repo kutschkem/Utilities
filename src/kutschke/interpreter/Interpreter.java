@@ -28,7 +28,7 @@ public interface Interpreter {
 	 * 
 	 * @throws SyntaxException
 	 */
-	public void closeBracket() throws SyntaxException;
+	public Object closeBracket() throws SyntaxException;
 
 	/**
 	 * called when a word or number token is found

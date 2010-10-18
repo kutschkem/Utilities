@@ -2,7 +2,7 @@ package kutschke.higherClass;
 
 /**
  * an interface for the most general of all Operations, can be applied to any
- * amount of parameters (either in a collection or an array
+ * amount of parameters
  * 
  * @author Michael
  * 
