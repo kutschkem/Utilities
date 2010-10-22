@@ -3,7 +3,7 @@ package kutschke.interpreter;
 import java.util.HashMap;
 import java.util.Map;
 
-public class S_ExpBuilder extends SimpleInterpreter {
+public class S_ExpBuilder extends LispStyleInterpreter {
 
 	protected Map<String,Class<? extends S_Exp>> S_Expmap = new HashMap<String,Class<? extends S_Exp>>();
 

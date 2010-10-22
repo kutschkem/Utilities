@@ -1,5 +1,10 @@
 package kutschke.interpreter;
 
+import java.util.List;
+
+import kutschke.higherClass.Binding;
+import kutschke.higherClass.GeneralOperation;
+
 /**
  * Interface for Interpreters to be used with the Parser class.<br/>
  * Note that by default, the parser does a check on matching opening and closing
@@ -52,5 +57,12 @@ public interface Interpreter {
 	 * @throws SyntaxException
 	 */
 	public void end() throws SyntaxException;
+	
+	public void pushScope();
+	public void popScope();
+	
+	public Binding<Object,?> addMethod(String name, GeneralOperation<Object, ?> method);
+	public GeneralOperation<Object, ?> getMapping(String methodName);
+	public List<Object> getActualParameters();
 
 }

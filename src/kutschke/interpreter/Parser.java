@@ -1,30 +1,45 @@
 package kutschke.interpreter;
 
-import java.io.BufferedInputStream;
+import static java.io.StreamTokenizer.TT_EOF;
+import static java.io.StreamTokenizer.TT_NUMBER;
+import static java.io.StreamTokenizer.TT_WORD;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StreamTokenizer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import kutschke.higherClass.Lambda;
 import kutschke.higherClass.ReflectiveFun;
 
-import static java.io.StreamTokenizer.*;
-
 public class Parser {
 
+	public final static int BEGIN = 1;
+	public final static int END = 2;
+	public final static int COMMENTS = 4;
+	public final static int DEFAULT = -1;
+	
 	private char bracketOpen = '(';
 	private char bracketClose = ')';
 	private Interpreter interpreter;
 	private boolean greedy = true;
+	private int flags = DEFAULT;
 	
 	private List<Character> ordinary = new ArrayList<Character>();
 	private List<Character> wordchars = new ArrayList<Character>();
 	private List<Character> quoteChars = new ArrayList<Character>();
 	private Map<String, Lambda<String,?>> converters = new LinkedHashMap<String,Lambda<String,?>>();
+	
+	public Parser(){
+		
+	}
+	
+	public Parser(int flags){
+		setFlags(flags);
+	}
 	
 	public void ordinaryChar(char c){
 		ordinary.add(c);
@@ -65,11 +80,16 @@ public class Parser {
 		return bracketClose;
 	}
 	
-	public void parse(InputStream in) throws SyntaxException, IOException{
-		StreamTokenizer tokenizer = new StreamTokenizer(new InputStreamReader(new BufferedInputStream(in)));
+	public Object parse(Reader in) throws SyntaxException, IOException{
+		StreamTokenizer tokenizer = new StreamTokenizer(in);
 		final char openBracket = getBracketOpen();
 		final char closeBracket = getBracketClose();
+		Object result = null;
 		int brackets = 0;
+		if((getFlags() & COMMENTS) == 0){
+			tokenizer.slashSlashComments(false);
+			tokenizer.slashStarComments(false);
+		}
 		
 		for(Character c : ordinary){
 			tokenizer.ordinaryChar(c);
@@ -82,7 +102,8 @@ public class Parser {
 		}
 		
 		try{
-		interpreter.begin();
+		if((getFlags() & BEGIN) != 0)
+			interpreter.begin();
 		while(tokenizer.nextToken() != TT_EOF){
 			if(tokenizer.ttype == openBracket){
 				interpreter.openBracket();
@@ -92,7 +113,7 @@ public class Parser {
 				brackets --;
 				if(brackets < 0)
 					throw new SyntaxException("Missing closing bracket");
-				interpreter.closeBracket();
+				result = interpreter.closeBracket();
 				if(brackets == 0 && ! greedy)
 					break;
 			}
@@ -111,11 +132,13 @@ public class Parser {
 		}
 		if(brackets > 0)
 			throw new SyntaxException("Too many closing brackets");
+		if((getFlags() & END) != 0)
 		interpreter.end();
 		}catch(SyntaxException se){
 			throw new SyntaxException("Exception occured while interpreting line "
 					+ tokenizer.lineno(),se);
 		}
+		return result;
 	}
 
 
@@ -153,9 +176,12 @@ public class Parser {
 	
 	public static Parser standardParser(){
 		Parser parser = new Parser();
+		// wordchars for proper parsing of Classnames,  numbers etc.
 		parser.wordChar('_');
 		parser.wordChar('.');
 		parser.wordChar('-');
+		parser.wordChar('[');
+		parser.wordChar(';');
 		
 		try {
 			parser.addConverter("[+\\-]?\\d+(\\.\\d+)?", new ReflectiveFun<Number>("parseDouble",Double.class,String.class).singleParameterAdapter(String.class));
@@ -168,6 +194,20 @@ public class Parser {
 		}
 		
 		return parser;
+	}
+
+	/**
+	 * @param flags the flags to set
+	 */
+	public void setFlags(int flags) {
+		this.flags = flags;
+	}
+
+	/**
+	 * @return the flags
+	 */
+	public int getFlags() {
+		return flags;
 	}
 	
 }

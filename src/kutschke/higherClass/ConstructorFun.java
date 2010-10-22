@@ -8,7 +8,7 @@ public class ConstructorFun<ResultType> implements GeneralOperation<Object, Resu
 
 	private Constructor<ResultType> cons;
 	
-	public ConstructorFun(Class<ResultType> clazz, Class<?>[] parameterTypes) throws SecurityException, NoSuchMethodException{
+	public ConstructorFun(Class<ResultType> clazz, Class<?>... parameterTypes) throws SecurityException, NoSuchMethodException{
 		cons = clazz.getConstructor(parameterTypes);
 	}
 	
