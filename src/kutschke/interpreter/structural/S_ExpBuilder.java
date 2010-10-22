@@ -1,7 +1,10 @@
-package kutschke.interpreter;
+package kutschke.interpreter.structural;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import kutschke.interpreter.LispStyleInterpreter;
+import kutschke.interpreter.SyntaxException;
 
 public class S_ExpBuilder extends LispStyleInterpreter {
 

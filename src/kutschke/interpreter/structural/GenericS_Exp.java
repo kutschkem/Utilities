@@ -1,9 +1,10 @@
-package kutschke.interpreter;
+package kutschke.interpreter.structural;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
 
 import kutschke.higherClass.GeneralOperation;
+import kutschke.interpreter.SyntaxException;
 
 public class GenericS_Exp extends LinkedList<Object> implements S_Exp {
 
