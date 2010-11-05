@@ -5,7 +5,6 @@ import java.util.Stack;
 
 import kutschke.higherClass.Binding;
 import kutschke.higherClass.GeneralOperation;
-import kutschke.higherClass.Identity;
 
 public class LocalAdapter implements Interpreter {
 

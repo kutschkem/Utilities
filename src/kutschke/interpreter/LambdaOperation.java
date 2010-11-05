@@ -1,43 +1,38 @@
 package kutschke.interpreter;
 
-import java.io.StringReader;
 import java.util.List;
 
 import kutschke.higherClass.Binding;
 import kutschke.higherClass.GeneralOperation;
 import kutschke.higherClass.ReflectiveFun;
+import kutschke.interpreter.abstractSyntax.AbSParser;
 
 public class LambdaOperation implements GeneralOperation<Object, Object> {
 
-	Parser parser;
-	Interpreter interpreter;
+	AbSParser parser;
 	List<Object> params;
-	String function;
+	List<?> function;
 	
-	public LambdaOperation(Parser parser, Interpreter interpreter, List<Object> params, String function){
+	public LambdaOperation(AbSParser parser, List<Object> params, List<?> list){
 		this.parser = parser;
-		this.interpreter = interpreter;
 		this.params = params;
-		this.function = function;
+		this.function = list;
 	}
 
 	@Override
 	public Object apply(Object[] arg) throws Exception {
-		interpreter.pushScope();
-		interpreter.addMethod("__params", new Binding<Object,Object>(
+		parser.getInterpreter().pushScope();
+		parser.getInterpreter().addMethod("__params", new Binding<Object,Object>(
 				new ReflectiveFun<Object>("getParamByName", getClass(),
 						Object[].class, Object.class).setBound(this)).bind(0,
 				arg));
-		int parserflags = parser.getFlags();
-		parser.setFlags(0);
-		Object result = parser.parse(new StringReader(function));
-		interpreter.getActualParameters().remove(interpreter.getActualParameters().size() - 1);
+		Object result = parser.parse(function);
+		parser.getInterpreter().getActualParameters().remove(parser.getInterpreter().getActualParameters().size() - 1);
 		/*
 		 * removing is necessary because otherwise the result will get into the
 		 * parameters twice
 		 */
-		interpreter.popScope();
-		parser.setFlags(parserflags);
+		parser.getInterpreter().popScope();
 		return result;
 	}
 

@@ -5,67 +5,77 @@ import java.util.List;
 
 import kutschke.higherClass.Binding;
 import kutschke.higherClass.GeneralOperation;
-import kutschke.higherClass.Identity;
+import kutschke.interpreter.abstractSyntax.AbSBuilder;
+import kutschke.interpreter.abstractSyntax.AbSParser;
 
 public class LambdaAdapter implements Interpreter {
 
 	private Interpreter delegate;
-	private final static int LAMBDA_STATE = 1;
-	private final static int PARAM_STATE = 2;
-	private final static int FUNCTION_STATE = 4;
-	private final static int FINAL_STATE = 8;
-	private int state = 0;
+
+	private static enum states {
+		DEFAULT, LAMBDA_STATE, PARAM_STATE, FUNCTION_STATE, FINAL_STATE
+	}
+
+	private states state = states.DEFAULT;
 	private String lambdaName = "lambda";
 	private boolean lastWasOpenBracket = false;
-	private StringBuilder builder;
 	private List<Object> params;
 	private int lambdaDepth = -1;
-	private Parser parser;
+	private AbSParser parser;
+	private AbSBuilder builder = new AbSBuilder();
 
-	public LambdaAdapter(Interpreter adaptee, Parser parser) {
+	/**
+	 * Beware: cyclic dependency is necessary here!!
+	 * 
+	 * @param adaptee
+	 * @param parser
+	 *            a parser that, when running, has been assigned the top-level
+	 *            interpreter as interpreter
+	 */
+	public LambdaAdapter(Interpreter adaptee, AbSParser parser) {
 		delegate = adaptee;
 		this.parser = parser;
 	}
 
 	@Override
 	public void begin() throws SyntaxException {
-		if(delegate.getMapping(lambdaName) == null)
-		delegate.addMethod("lambda", new Identity<Object>());
+		if (delegate.getMapping(lambdaName) == null)
+			delegate.addMethod("lambda", new Identity<Object>());
 		delegate.begin();
 
 	}
 
 	@Override
 	public Object closeBracket() throws SyntaxException {
-		switch(state){
-		case 0:
+		switch (state) {
+		case DEFAULT:
 			return delegate.closeBracket();
 		case LAMBDA_STATE:
 			throw new SyntaxException("Misplaced closing bracket");
 		case PARAM_STATE:
-			state = LAMBDA_STATE;
+			state = states.LAMBDA_STATE;
 			break;
 		case FUNCTION_STATE:
-			lambdaDepth --;
-			if(lambdaDepth == 0)
-				state = FINAL_STATE;
-			builder.append(parser.getBracketClose());
+			if (lambdaDepth == 0)
+				state = states.FINAL_STATE;
+			lambdaDepth--;
+			builder.closeBracket();
 			break;
 		case FINAL_STATE:
-			state = 0;
+			state = states.DEFAULT;
 			lambdaDepth = -1;
-			Object result = makeLambda(params,builder.toString());
+			Object result = makeLambda(params);
 			delegate.token(result);
 			delegate.closeBracket();
 			params = null;
-			builder = null;
+			builder.clear();
 			return result;
 		}
 		return null;
 	}
 
-	private Object makeLambda(List<Object> params2, String string) {
-		return new LambdaOperation(parser,delegate,params2,string);
+	private Object makeLambda(List<Object> params) {
+		return new LambdaOperation(parser, params, builder.getAbstractSyntax());
 	}
 
 	@Override
@@ -76,19 +86,19 @@ public class LambdaAdapter implements Interpreter {
 
 	@Override
 	public void openBracket() throws SyntaxException {
+		lastWasOpenBracket = true;
 		switch (state) {
-		case 0:
+		case DEFAULT:
 			delegate.openBracket();
-			lastWasOpenBracket = true;
 			break;
 		case LAMBDA_STATE:
 			if (params == null) {
-				state = PARAM_STATE;
+				state = states.PARAM_STATE;
 				params = new ArrayList<Object>();
 			} else {
-				state = FUNCTION_STATE;
-				builder = new StringBuilder();
-				builder.append(parser.getBracketOpen());
+				state = states.FUNCTION_STATE;
+				builder.clear();
+				builder.openBracket();
 				lambdaDepth = 0;
 			}
 			break;
@@ -96,7 +106,7 @@ public class LambdaAdapter implements Interpreter {
 			throw new SyntaxException(
 					"Expected Parameter declaration, but found '('");
 		case FUNCTION_STATE:
-			builder.append(parser.getBracketOpen());
+			builder.openBracket();
 			lambdaDepth++;
 			break;
 		case FINAL_STATE:
@@ -109,28 +119,11 @@ public class LambdaAdapter implements Interpreter {
 	public void special(char special) throws SyntaxException {
 		lastWasOpenBracket = false;
 		switch (state) {
-		case 0:
+		case DEFAULT:
 			delegate.special(special);
 			break;
-		case LAMBDA_STATE:
-			throw new SyntaxException("Expected ( but found: " + special);
-		case PARAM_STATE:
-			params.add(special);
-			break;
-		case FUNCTION_STATE:
-			if (params.contains(special)) {
-				builder.append(parser.getBracketOpen());
-				builder.append("__params ");
-				builder.append(special);
-				builder.append(parser.getBracketClose());
-			} else {
-				builder.append(" ");
-				builder.append(special);
-			}
-			break;
-		case FINAL_STATE:
-			throw new SyntaxException("Expected closing bracket, found: "
-					+ special);
+		default:
+			token(special);
 		}
 
 	}
@@ -138,10 +131,9 @@ public class LambdaAdapter implements Interpreter {
 	@Override
 	public void token(Object t) throws SyntaxException {
 		switch (state) {
-		case 0:
+		case DEFAULT:
 			if (lastWasOpenBracket && t.equals(lambdaName)) {
-				state = LAMBDA_STATE;
-				lastWasOpenBracket = false;
+				state = states.LAMBDA_STATE;
 			}
 			delegate.token(t);
 			break;
@@ -152,19 +144,26 @@ public class LambdaAdapter implements Interpreter {
 			break;
 		case FUNCTION_STATE:
 			if (params.contains(t)) {
-				builder.append(parser.getBracketOpen());
-				builder.append("__params ");
-				builder.append(t);
-				builder.append(parser.getBracketClose());
+				builder.openBracket();
+				builder.token("__params");
+				builder.token(t);
+				builder.closeBracket();
 			} else {
-				builder.append(" ");
-				builder.append(t);
+				Object temp = delegate.getMapping(t.toString()); // account for
+																	// scoping
+																	// issues
+				// btw. this is also a little optimization
+				if (t instanceof String && temp != null)
+					builder.token(temp);
+				else
+					builder.token(t);
 			}
 
 			break;
 		case FINAL_STATE:
 			throw new SyntaxException("Expected closing bracket, found: " + t);
 		}
+		lastWasOpenBracket = false;
 
 	}
 
@@ -196,7 +195,7 @@ public class LambdaAdapter implements Interpreter {
 
 	@Override
 	public void popScope() {
-	 delegate.popScope();
+		delegate.popScope();
 	}
 
 	@Override
@@ -207,7 +206,7 @@ public class LambdaAdapter implements Interpreter {
 	@Override
 	public List<Object> getActualParameters() {
 		return delegate.getActualParameters();
-		
+
 	}
 
 }

@@ -27,6 +27,11 @@ public class InterpreterTest {
 		assertTrue(result instanceof List);
 		System.out.println(result);
 		
+		program = "(define foobar (lambda (a b) (list a b))) (foobar c d)";
+		result = parser.parse(new StringReader(program));
+		System.out.println(result);
+		assertTrue(result instanceof List);
+
 	}
 
 }

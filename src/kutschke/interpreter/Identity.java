@@ -1,5 +1,6 @@
-package kutschke.higherClass;
+package kutschke.interpreter;
 
+import kutschke.higherClass.GeneralOperation;
 import interfaces.SideEffects;
 
 public class Identity<T> implements GeneralOperation<T, T> {

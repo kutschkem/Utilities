@@ -14,6 +14,7 @@ import kutschke.higherClass.Binding;
 import kutschke.higherClass.ConstructorFun;
 import kutschke.higherClass.GeneralOperation;
 import kutschke.higherClass.ReflectiveFun;
+import kutschke.interpreter.abstractSyntax.AbSParser;
 
 /**
  * A Lip-style interpreter. This means, parsers should call the Interpreters
@@ -94,7 +95,7 @@ public class LispStyleInterpreter implements Interpreter,
 		} else
 			method = getMapping(actual.get(0).toString());
 		if (method == null)
-			throw new SyntaxException("Unknown method " + actual.get(0));
+			throw new SyntaxException("Unknown method \"" + actual.get(0)+'\"');
 		Object result = null;
 		if (isDEBUG()) {
 			System.err.println("[DEBUG]: Interpreting " + actual);
@@ -165,7 +166,10 @@ public class LispStyleInterpreter implements Interpreter,
 			e.printStackTrace();
 		}
 		inter.setDEBUG(true);
-		return new LambdaAdapter(new LocalAdapter(inter), Parser.standardParser());
+		AbSParser parser = new AbSParser();
+		Interpreter preter = new LambdaAdapter(new LocalAdapter(inter), parser);
+		parser.setInterpreter(preter);
+		return preter;
 	}
 
 	@Override
