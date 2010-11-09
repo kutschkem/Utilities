@@ -151,6 +151,7 @@ public class LispStyleInterpreter implements Interpreter,
 		DEBUG = debug;
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public static Interpreter metaInterpreter(){
 		LispStyleInterpreter inter = new LispStyleInterpreter();
 		try {

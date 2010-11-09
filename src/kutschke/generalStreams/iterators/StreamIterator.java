@@ -23,7 +23,7 @@ public class StreamIterator<E> implements Iterator<E> {
 		} catch (Exception e) {
 			return false;
 		}
-		return true;
+		return buffer != InStream.NULL;
 	}
 
 	/**

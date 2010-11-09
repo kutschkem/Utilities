@@ -12,6 +12,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import kutschke.generalStreams.GeneralInStream;
+import kutschke.generalStreams.InStream;
+import kutschke.generalStreams.iterators.StreamIterator;
 import kutschke.higherClass.Lambda;
 import kutschke.higherClass.ReflectiveFun;
 
@@ -25,7 +28,6 @@ public class Parser {
 	private char bracketOpen = '(';
 	private char bracketClose = ')';
 	private Interpreter interpreter;
-	private boolean greedy = true;
 	private int flags = DEFAULT;
 	
 	private List<Character> ordinary = new ArrayList<Character>();
@@ -80,68 +82,106 @@ public class Parser {
 		return bracketClose;
 	}
 	
+	/**
+	 * convenience method to parse the whole stream
+	 * @param in
+	 * @return
+	 * @throws SyntaxException
+	 * @throws IOException
+	 */
 	public Object parse(Reader in) throws SyntaxException, IOException{
-		StreamTokenizer tokenizer = new StreamTokenizer(in);
-		final char openBracket = getBracketOpen();
-		final char closeBracket = getBracketClose();
+		StreamIterator<Object> streamIt = new StreamIterator<Object>(stream(in));
 		Object result = null;
-		int brackets = 0;
-		if((getFlags() & COMMENTS) == 0){
-			tokenizer.slashSlashComments(false);
-			tokenizer.slashStarComments(false);
-		}
-		
-		for(Character c : ordinary){
-			tokenizer.ordinaryChar(c);
-		}
-		for(Character c : wordchars){
-			tokenizer.wordChars(c, c);
-		}
-		for(Character c : quoteChars){
-			tokenizer.quoteChar(c);
-		}
-		
-		try{
-		if((getFlags() & BEGIN) != 0)
-			interpreter.begin();
-		while(tokenizer.nextToken() != TT_EOF){
-			if(tokenizer.ttype == openBracket){
-				interpreter.openBracket();
-				brackets ++;
-			}
-			else if(tokenizer.ttype == closeBracket){
-				brackets --;
-				if(brackets < 0)
-					throw new SyntaxException("Missing closing bracket");
-				result = interpreter.closeBracket();
-				if(brackets == 0 && ! greedy)
-					break;
-			}
-			else
-			switch(tokenizer.ttype){
-			case TT_NUMBER:
-				interpreter.token(tokenizer.nval);
-				break;
-			case TT_WORD:	
-				interpreter.token(convert(tokenizer.sval));
-				break;
-			default:
-				interpreter.special((char) tokenizer.ttype);
-				
-			}
-		}
-		if(brackets > 0)
-			throw new SyntaxException("Too many closing brackets");
-		if((getFlags() & END) != 0)
-		interpreter.end();
-		}catch(SyntaxException se){
-			throw new SyntaxException("Exception occured while interpreting line "
-					+ tokenizer.lineno(),se);
+		while(streamIt.hasNext()){
+			result = streamIt.next();
 		}
 		return result;
 	}
 
 
+	/**
+	 * returns a parsing stream that returns every top-level result
+	 * @param in
+	 * @return
+	 */
+	public InStream<Object> stream(final Reader in){
+		return new GeneralInStream<Object>(){
+			StreamTokenizer tokenizer = new StreamTokenizer(in);
+			final char openBracket = getBracketOpen();
+			final char closeBracket = getBracketClose();
+			final int flags = getFlags();
+
+			{
+				if((getFlags() & COMMENTS) == 0){
+					tokenizer.slashSlashComments(false);
+					tokenizer.slashStarComments(false);
+				}
+				
+				for(Character c : ordinary){
+					tokenizer.ordinaryChar(c);
+				}
+				for(Character c : wordchars){
+					tokenizer.wordChars(c, c);
+				}
+				for(Character c : quoteChars){
+					tokenizer.quoteChar(c);
+				}
+
+			}
+			
+			@Override
+			public Object read() throws IOException {
+					Object result = InStream.NULL;
+					int brackets = 0;
+					
+					try{
+					if((flags & BEGIN) != 0)
+						interpreter.begin();
+					while(tokenizer.nextToken() != TT_EOF){
+						if(tokenizer.ttype == openBracket){
+							interpreter.openBracket();
+							brackets ++;
+						}
+						else if(tokenizer.ttype == closeBracket){
+							brackets --;
+							if(brackets < 0)
+								throw new SyntaxException("Missing closing bracket");
+							result = interpreter.closeBracket();
+							if(brackets == 0)
+								break;
+						}
+						else
+						switch(tokenizer.ttype){
+						case TT_NUMBER:
+							interpreter.token(tokenizer.nval);
+							break;
+						case TT_WORD:	
+							interpreter.token(convert(tokenizer.sval));
+							break;
+						default:
+							interpreter.special((char) tokenizer.ttype);
+							
+						}
+					}
+					if(brackets > 0)
+						throw new SyntaxException("Too many closing brackets");
+					if((flags & END) != 0)
+					interpreter.end();
+					}catch(SyntaxException se){
+						throw new IOException("Exception occured while interpreting line "
+								+ tokenizer.lineno(),se);
+					}
+					return result;
+			}
+			
+			@Override
+			public void close() throws IOException{
+				in.close();
+			}
+			
+		};
+	}
+	
 	private Object convert(String sval) {
 		for(String pattern : converters.keySet()){
 			if(sval.matches(pattern))
@@ -162,16 +202,6 @@ public class Parser {
 
 	public void setInterpreter(Interpreter interpreter) {
 		this.interpreter = interpreter;
-	}
-
-
-	public boolean isGreedy() {
-		return greedy;
-	}
-
-
-	public void setGreedy(boolean greedy) {
-		this.greedy = greedy;
 	}
 	
 	public static Parser standardParser(){

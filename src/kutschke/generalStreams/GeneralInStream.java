@@ -8,7 +8,8 @@ import java.io.IOException;
  * 
  * @author Michael
  * 
- * @param <T> the type of the elements of the stream
+ * @param <T>
+ *            the type of the elements of the stream
  */
 public abstract class GeneralInStream<T> implements InStream<T> {
 	@Override
@@ -18,13 +19,18 @@ public abstract class GeneralInStream<T> implements InStream<T> {
 
 	@Override
 	public void read(T[] buf, int offs, int len) throws IOException {
-		for (int i = offs; i < offs + len; i++)
-			buf[i] = read();
+		for (int i = offs; i < offs + len; i++) {
+			T c = read();
+			if (c == NULL)
+				buf[i] = null;
+			else
+				buf[i] = read();
+		}
 	}
-	
+
 	@Override
-	public void close() throws IOException{
-		
+	public void close() throws IOException {
+
 	}
 
 }
