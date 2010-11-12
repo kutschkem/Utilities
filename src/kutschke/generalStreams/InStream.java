@@ -11,11 +11,9 @@ import java.io.IOException;
  */
 public interface InStream<T> {
 	
-
-	public final static Object NULL = new Object();
 	/**
 	 * 
-	 * @return the next element or Instream.NULL if there are no more (allows for null)
+	 * @return the next element or null if there are no more
 	 */
 	public T read() throws IOException;
 

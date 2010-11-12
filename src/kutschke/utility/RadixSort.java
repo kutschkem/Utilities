@@ -27,7 +27,7 @@ public class RadixSort {
 	
 	
 	/**
-	 * f�hrt einen RadixSort auf einer Liste durch
+	 * fuehrt einen RadixSort auf einer Liste durch
 	 * @param <T>
 	 * @param Objects
 	 * @param fkt
@@ -70,7 +70,7 @@ public class RadixSort {
 			counter[i]++;
 		}
 
-		for(int i = 1; i < counter.length; i++){    // kleiner-gleich Elemente z�hlen
+		for(int i = 1; i < counter.length; i++){    // kleiner-gleich Elemente zaehlen
 			counter[i] += counter[i-1];
 		}
 
@@ -78,14 +78,15 @@ public class RadixSort {
 		System.arraycopy(Objects, 0, temp, 0, Objects.length);
 		for(int i = Objects.length -1; i >= 0; i--){
 			int j = fkt.apply((T)temp[i]);
-			counter[j]--;										// hier abziehen, da das Objekt selbst mitgez�hlt wurde (offset 1)
+			counter[j]--;										// hier abziehen, da das Objekt selbst mitgezaehlt wurde (offset 1)
 			Objects[counter[j]] = (T) temp[i];
 		}
 			
 	}
 	
-	@SuppressWarnings({ "unchecked", "unused" })
+	@SuppressWarnings("unused")
 	private static <T> List<T> BucketSort(List<T> lst, NoThrowLambda<T,Integer> fkt, int maxbuckets){
+		@SuppressWarnings("unchecked")
 		List<T>[] lists = new LinkedList[maxbuckets];
 		for(int i=0; i < maxbuckets; i++)
 			lists[i] = new LinkedList<T>();
