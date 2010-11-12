@@ -20,10 +20,6 @@ public abstract class GeneralInStream<T> implements InStream<T> {
 	@Override
 	public void read(T[] buf, int offs, int len) throws IOException {
 		for (int i = offs; i < offs + len; i++) {
-			T c = read();
-			if (c == NULL)
-				buf[i] = null;
-			else
 				buf[i] = read();
 		}
 	}
