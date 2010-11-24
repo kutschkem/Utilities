@@ -36,6 +36,14 @@ final class SealableBinding extends Binding<Object,Object>{
 			throw new ConcurrentModificationException("Binding sealed");
 		}
 		return (SealableBinding) super.bind(parameter, value);
-	} 
+	}
+	
+	@Override
+	public String toString(){
+		if(sealed)
+			return "sealed("+super.toString()+")";
+		else
+			return super.toString();
+	}
 	
 }

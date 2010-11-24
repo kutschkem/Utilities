@@ -41,5 +41,10 @@ public class Binding<ArgType, ResultType> implements GeneralOperation<ArgType, R
 				(ArgType[]) Array.newInstance(
 						arg.getClass().getComponentType(), params.size())));
 	}
+	
+	@Override
+	public String toString(){
+		return bound + (bindings.isEmpty() ? "" : "&(" + bindings + ")");
+	}
 
 }

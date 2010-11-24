@@ -9,7 +9,16 @@ public class AbSParser {
 		bracketOpen,
 		bracketClose,
 		pushScope,
-		popScope
+		popScope;
+		
+		@Override
+		public String toString(){
+			switch(this){
+			case bracketOpen: return "(";
+			case bracketClose: return ")";
+			default: return "";
+			}
+		}
 	}
 
 	private Interpreter interp;

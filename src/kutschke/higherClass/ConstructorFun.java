@@ -4,14 +4,16 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 
-public class ConstructorFun<ResultType> implements GeneralOperation<Object, ResultType> {
+public class ConstructorFun<ResultType> implements
+		GeneralOperation<Object, ResultType> {
 
 	private Constructor<ResultType> cons;
-	
-	public ConstructorFun(Class<ResultType> clazz, Class<?>... parameterTypes) throws SecurityException, NoSuchMethodException{
+
+	public ConstructorFun(Class<ResultType> clazz, Class<?>... parameterTypes)
+			throws SecurityException, NoSuchMethodException {
 		cons = clazz.getConstructor(parameterTypes);
 	}
-	
+
 	@Override
 	public ResultType apply(Object... arg) throws Exception {
 		Class<?>[] parameterTypes = cons.getParameterTypes();
@@ -20,17 +22,14 @@ public class ConstructorFun<ResultType> implements GeneralOperation<Object, Resu
 			if (arg.length > parameterTypes.length
 					|| arg.length == parameterTypes.length - 1
 					|| !arg[parameterTypes.length - 1].getClass().equals(
-							parameterTypes[parameterTypes.length - 1])) { // doesn't
-																			// catch
-																			// all
-																			// corner
-																			// cases,
-																			// but
-																			// try
-																			// best
+							parameterTypes[parameterTypes.length - 1])) {
+				/*
+				 * doesn't catch all corner cases, but try
+				 * best
+				 */
 				Object[] t_args = Arrays.copyOf(arg, parameterTypes.length);
-				Object[] varargs = Arrays.asList(arg).subList(
-						t_args.length - 1, arg.length).toArray();
+				Object[] varargs = Arrays.asList(arg)
+						.subList(t_args.length - 1, arg.length).toArray();
 				// not enough, we need to make sure the array has the right type
 				Object arr = Array.newInstance(
 						parameterTypes[parameterTypes.length - 1]
@@ -43,7 +42,12 @@ public class ConstructorFun<ResultType> implements GeneralOperation<Object, Resu
 			}
 
 		}
-			return (ResultType) cons.newInstance(arg);
+		return (ResultType) cons.newInstance(arg);
+	}
+
+	@Override
+	public String toString() {
+		return cons.toGenericString();
 	}
 
 }

@@ -118,5 +118,10 @@ public class ReflectiveFun<ResultType> implements
 		throw new UnsupportedOperationException("Method "+method.toString()
 				+" has too many parameters");
 	}
+	
+	@Override
+	public String toString(){
+		return (bound == null ? "" : "[" + bound + "]->") + method;
+	}
 
 }
