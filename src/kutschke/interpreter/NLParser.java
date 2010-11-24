@@ -39,7 +39,7 @@ public class NLParser {
 				buffer = inStr.read();
 				checked = true;
 			} catch (Exception e) {
-				return false;
+				throw new RuntimeException(e);
 			}
 			return buffer != NULL;
 		}
@@ -104,13 +104,19 @@ public class NLParser {
 					while (tokenizer.nextToken() != TT_EOF) {
 							switch (tokenizer.ttype) {
 							case TT_NUMBER:
-								if(! openedBracket)
+								lastWasNL = false;
+								if(! openedBracket){
 									interpreter.openBracket();
-								interpreter.token(tokenizer.nval);
+									openedBracket = true;
+								}
+								interpreter.token(convert(String.valueOf(tokenizer.nval)));
 								break;
 							case TT_WORD:
-								if(! openedBracket)
+								lastWasNL = false;
+								if(! openedBracket){
 									interpreter.openBracket();
+									openedBracket = true;
+								}
 								interpreter.token(convert(tokenizer.sval));
 								break;
 							case TT_EOL:
@@ -120,6 +126,7 @@ public class NLParser {
 								openedBracket = false;
 								break;
 							default:
+								lastWasNL = false;
 								interpreter.special((char) tokenizer.ttype);
 
 							}
