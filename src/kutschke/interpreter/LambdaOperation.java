@@ -27,17 +27,18 @@ public class LambdaOperation implements GeneralOperation<Object, Object> {
 						Object[].class, Object.class).setBound(this)).bind(0,
 				arg));
 		Object result = parser.parse(function);
-		parser.getInterpreter().getActualParameters().remove(parser.getInterpreter().getActualParameters().size() - 1);
-		/*
-		 * removing is necessary because otherwise the result will get into the
-		 * parameters twice
-		 */
+
 		parser.getInterpreter().popScope();
 		return result;
 	}
 
 	public Object getParamByName(Object[] arg, Object name) {
 		return arg[params.indexOf(name)];
+	}
+	
+	@Override
+	public String toString(){
+		return "(lambda " + function + ")";
 	}
 
 }

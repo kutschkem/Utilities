@@ -80,12 +80,6 @@ public class AbSBuilder implements Interpreter {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	@Override
-	public List<Object> getActualParameters() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	
 	public List<?> getAbstractSyntax(){
 		return new ArrayList<Object>(absList);

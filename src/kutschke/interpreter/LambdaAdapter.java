@@ -39,8 +39,6 @@ public class LambdaAdapter implements Interpreter {
 
 	@Override
 	public void begin() throws SyntaxException {
-		if (delegate.getMapping(lambdaName) == null)
-			delegate.addMethod("lambda", new Identity<Object>());
 		delegate.begin();
 
 	}
@@ -66,7 +64,6 @@ public class LambdaAdapter implements Interpreter {
 			lambdaDepth = -1;
 			Object result = makeLambda(params);
 			delegate.token(result);
-			delegate.closeBracket();
 			params = null;
 			builder.clear();
 			return result;
@@ -88,9 +85,6 @@ public class LambdaAdapter implements Interpreter {
 	public void openBracket() throws SyntaxException {
 		lastWasOpenBracket = true;
 		switch (state) {
-		case DEFAULT:
-			delegate.openBracket();
-			break;
 		case LAMBDA_STATE:
 			if (params == null) {
 				state = states.PARAM_STATE;
@@ -117,9 +111,12 @@ public class LambdaAdapter implements Interpreter {
 
 	@Override
 	public void special(char special) throws SyntaxException {
-		lastWasOpenBracket = false;
 		switch (state) {
 		case DEFAULT:
+			if (lastWasOpenBracket) {
+				delegate.openBracket();
+				lastWasOpenBracket = false;
+			}
 			delegate.special(special);
 			break;
 		default:
@@ -132,10 +129,15 @@ public class LambdaAdapter implements Interpreter {
 	public void token(Object t) throws SyntaxException {
 		switch (state) {
 		case DEFAULT:
-			if (lastWasOpenBracket && t.equals(lambdaName)) {
-				state = states.LAMBDA_STATE;
-			}
-			delegate.token(t);
+			if (lastWasOpenBracket) {
+				if (t.equals(lambdaName)) {
+					state = states.LAMBDA_STATE;
+				} else {
+					delegate.openBracket();
+					delegate.token(t);
+				}
+			} else
+				delegate.token(t);
 			break;
 		case LAMBDA_STATE:
 			throw new SyntaxException("expected ( but found: " + t);
@@ -153,6 +155,7 @@ public class LambdaAdapter implements Interpreter {
 																	// scoping
 																	// issues
 				// btw. this is also a little optimization
+				//FIXME this makes internal overriding impossible
 				if (t instanceof String && temp != null)
 					builder.token(temp);
 				else
@@ -201,12 +204,6 @@ public class LambdaAdapter implements Interpreter {
 	@Override
 	public void pushScope() {
 		delegate.pushScope();
-	}
-
-	@Override
-	public List<Object> getActualParameters() {
-		return delegate.getActualParameters();
-
 	}
 
 }

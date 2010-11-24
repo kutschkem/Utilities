@@ -1,7 +1,5 @@
 package kutschke.interpreter;
 
-import java.util.List;
-
 import kutschke.higherClass.Binding;
 import kutschke.higherClass.GeneralOperation;
 
@@ -63,6 +61,5 @@ public interface Interpreter {
 	
 	public Binding<Object,?> addMethod(String name, GeneralOperation<Object, ?> method);
 	public GeneralOperation<Object, ?> getMapping(String methodName);
-	public List<Object> getActualParameters();
 
 }

@@ -173,9 +173,4 @@ public class LispStyleInterpreter implements Interpreter,
 		return preter;
 	}
 
-	@Override
-	public List<Object> getActualParameters() {
-		return actual;
-	}
-
 }

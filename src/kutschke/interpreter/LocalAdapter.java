@@ -1,6 +1,5 @@
 package kutschke.interpreter;
 
-import java.util.List;
 import java.util.Stack;
 
 import kutschke.higherClass.Binding;
@@ -88,11 +87,6 @@ public class LocalAdapter implements Interpreter {
 	public Binding<Object, ?> addMethod(String name,
 			GeneralOperation<Object, ?> method) {
 		return delegate.addMethod(name, method);
-	}
-
-	@Override
-	public List<Object> getActualParameters() {
-		return delegate.getActualParameters();
 	}
 
 	@Override
