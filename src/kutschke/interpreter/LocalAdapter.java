@@ -18,8 +18,6 @@ public class LocalAdapter implements Interpreter {
 
 	@Override
 	public void begin() throws SyntaxException {
-		if (delegate.getMapping(getLocalName()) == null)
-			delegate.addMethod(getLocalName(), new Identity<Object>());
 		delegate.begin();
 	}
 
@@ -63,6 +61,7 @@ public class LocalAdapter implements Interpreter {
 		if (lastWasOpenbracket && t.equals(getLocalName())){
 			delegate.pushScope();
 			localDepths.push(0);
+			t = new Identity<Object>(); // avoid registering "local" as function name
 		}
 		lastWasOpenbracket = false;
 		delegate.token(t);
