@@ -1,0 +1,29 @@
+package kutschke.utility;
+
+import java.io.PrintStream;
+import java.io.PrintWriter;
+
+/**
+ * Runtime Exception Wrapper for "true" Exceptions. Will only print it's cause's
+ * StackTrace
+ * @author Michael
+ *
+ */
+public class OpaqueException extends RuntimeException {
+
+	public OpaqueException(Throwable cause) {
+		super(cause);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void printStackTrace(PrintStream str){
+		getCause().printStackTrace(str);
+	}
+	
+	@Override
+	public void printStackTrace(PrintWriter wrtr){
+		getCause().printStackTrace(wrtr);
+	}
+
+}

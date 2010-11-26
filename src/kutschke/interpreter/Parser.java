@@ -117,8 +117,11 @@ public class Parser extends NLParser{
 					if((flags & END) != 0)
 					interpreter.end();
 					}catch(SyntaxException se){
-						throw new IOException("Exception occured while interpreting line "
-								+ tokenizer.lineno(),se);
+						IOException io = new IOException(
+								"Exception occured while interpreting line "
+								+ tokenizer.lineno(), se);
+						io.setStackTrace(new StackTraceElement[]{});
+						throw io;
 					}
 					return result;
 			}

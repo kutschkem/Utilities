@@ -1,6 +1,9 @@
 package kutschke.interpreter;
 
-import static java.io.StreamTokenizer.*;
+import static java.io.StreamTokenizer.TT_EOF;
+import static java.io.StreamTokenizer.TT_EOL;
+import static java.io.StreamTokenizer.TT_NUMBER;
+import static java.io.StreamTokenizer.TT_WORD;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -14,6 +17,7 @@ import kutschke.generalStreams.GeneralInStream;
 import kutschke.generalStreams.InStream;
 import kutschke.generalStreams.iterators.StreamIterator;
 import kutschke.higherClass.Lambda;
+import kutschke.utility.OpaqueException;
 
 public class NLParser {
 	
@@ -39,7 +43,7 @@ public class NLParser {
 				buffer = inStr.read();
 				checked = true;
 			} catch (Exception e) {
-				throw new RuntimeException(e);
+				throw new OpaqueException(e);
 			}
 			return buffer != NULL;
 		}
@@ -136,9 +140,11 @@ public class NLParser {
 					if (tokenizer.ttype == TT_EOF && (flags & END) != 0)
 						interpreter.end();
 				} catch (SyntaxException se) {
-					throw new IOException(
+					IOException io = new IOException(
 							"Exception occured while interpreting line "
-									+ tokenizer.lineno(), se);
+							+ tokenizer.lineno(), se);
+					io.setStackTrace(new StackTraceElement[]{});
+					throw io;
 				}
 				return result;
 			}

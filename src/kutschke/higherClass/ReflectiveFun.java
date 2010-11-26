@@ -6,6 +6,15 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
+/**
+ * Represents a Java Function. Supports varags, but be careful with ambiguous
+ * cases like passing an Object[] to an Object... function which may work in
+ * some cases, but will fail to work as expected in others.
+ * 
+ * @author Michael
+ * 
+ * @param <ResultType>
+ */
 public class ReflectiveFun<ResultType> implements
 		GeneralOperation<Object, ResultType> {
 
@@ -39,7 +48,7 @@ public class ReflectiveFun<ResultType> implements
 	 */
 	public ReflectiveFun<ResultType> setBound(Object bound) {
 		this.bound = bound;
-		if (! method.getDeclaringClass().isInstance(bound))
+		if (!method.getDeclaringClass().isInstance(bound))
 			throw new ClassCastException(bound.getClass()
 					+ " is not compatible with " + method.getDeclaringClass());
 		return this;
@@ -72,17 +81,11 @@ public class ReflectiveFun<ResultType> implements
 			if (args.length > parameterTypes.length
 					|| args.length == parameterTypes.length - 1
 					|| !args[parameterTypes.length - 1].getClass().equals(
-							parameterTypes[parameterTypes.length - 1])) { // doesn't
-																			// catch
-																			// all
-																			// corner
-																			// cases,
-																			// but
-																			// try
-																			// best
+							parameterTypes[parameterTypes.length - 1])) {
+				/* doesn't catch all corner cases, but try best */
 				Object[] t_args = Arrays.copyOf(args, parameterTypes.length);
-				Object[] varargs = Arrays.asList(args).subList(
-						t_args.length - 1, args.length).toArray();
+				Object[] varargs = Arrays.asList(args)
+						.subList(t_args.length - 1, args.length).toArray();
 				// not enough, we need to make sure the array has the right type
 				Object arr = Array.newInstance(
 						parameterTypes[parameterTypes.length - 1]
@@ -95,10 +98,54 @@ public class ReflectiveFun<ResultType> implements
 			}
 
 		}
-		if (isStatic)
-			return (ResultType) method.invoke(null, args);
-		else
-			return (ResultType) method.invoke(instance, args);
+		try {
+			if (isStatic)
+				return (ResultType) method.invoke(null, args);
+			else
+				return (ResultType) method.invoke(instance, args);
+
+		} catch (IllegalArgumentException e) {
+
+			throw generateMeaningfulException(args, e);
+		}
+	}
+
+	/**
+	 * generates an exception more fit to be shown to users, includes which
+	 * parameters failed due to argument type mismatch, and shows which method
+	 * was invoked
+	 * 
+	 * @param args
+	 * @param ex
+	 * @return a exception containing more information than the average
+	 *         IllegalArgumentException
+	 */
+	private IllegalArgumentException generateMeaningfulException(Object[] args,
+			IllegalArgumentException ex) {
+		if (!"argument type mismatch".equals(ex.getMessage()))
+			return ex;
+		StringBuilder bldr = new StringBuilder();
+		bldr.append(ex.getLocalizedMessage());
+		bldr.append(": ");
+		for (int i = 0; i < args.length; i++) {
+			if (method.getParameterTypes()[i].isAssignableFrom(args[i]
+					.getClass()))
+				continue;
+			bldr.append("Parameter ");
+			bldr.append(i + 1);
+			bldr.append(" should be ");
+			bldr.append(method.getParameterTypes()[i]);
+			bldr.append(" but is ");
+			bldr.append(args[i].getClass());
+			bldr.append("; ");
+		}
+		StackTraceElement elem = new StackTraceElement(method
+				.getDeclaringClass().getCanonicalName(), method.getName(),
+				null, 0);
+		IllegalArgumentException e2 = new IllegalArgumentException(
+				bldr.toString());
+		e2.setStackTrace(new StackTraceElement[] { elem });
+		return e2;
 	}
 
 	public <T> Lambda<T, ResultType> singleParameterAdapter(Class<T> argType) {
@@ -115,12 +162,12 @@ public class ReflectiveFun<ResultType> implements
 			else
 				throw new IllegalArgumentException(
 						"Argument Type is not compatible");
-		throw new UnsupportedOperationException("Method "+method.toString()
-				+" has too many parameters");
+		throw new UnsupportedOperationException("Method " + method.toString()
+				+ " has too many parameters");
 	}
-	
+
 	@Override
-	public String toString(){
+	public String toString() {
 		return (bound == null ? "" : "[" + bound + "]->") + method;
 	}
 
