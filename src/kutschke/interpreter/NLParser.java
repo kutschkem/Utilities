@@ -184,8 +184,16 @@ public class NLParser {
 	public Object parse(Reader in) throws SyntaxException, IOException {
 		ProgramStreamIterator streamIt = new ProgramStreamIterator(stream(in));
 		Object result = null;
+		try{
 		while (streamIt.hasNext()) {
 			result = streamIt.next();
+		}
+		}catch(OpaqueException e){ // unbox relevant Exceptions
+			if(e.getCause() instanceof SyntaxException)
+				throw (SyntaxException) e.getCause();
+			if(e.getCause() instanceof IOException)
+				throw (IOException) e.getCause();
+			throw e;
 		}
 		return result;
 	}
