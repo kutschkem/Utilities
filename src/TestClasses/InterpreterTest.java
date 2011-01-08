@@ -32,20 +32,20 @@ public class InterpreterTest {
 		parser.setInterpreter(LispStyleInterpreter.metaInterpreter());
 		Object result = parser.parse(new StringReader(program));
 		assertTrue(result instanceof List);
-		assertArrayEquals(((List)result).toArray(), new Object[]{"a","b","c"});
+		assertArrayEquals(((List<?>)result).toArray(), new Object[]{"a","b","c"});
 		System.out.println(result);
 		
 		program = "(define foobar (lambda (a b) (list a b))) (foobar (foobar c d) (foobar e f))";
 		result = parser.parse(new StringReader(program));
 		System.out.println(result);
 		assertTrue(result instanceof List);
-		assertArrayEquals(((List)result).toArray(), new Object[]{Arrays.asList("c","d"), Arrays.asList("e","f")});
+		assertArrayEquals(((List<?>)result).toArray(), new Object[]{Arrays.asList("c","d"), Arrays.asList("e","f")});
 
 	}
 	
 	@Test
-	public void testLambdaIssues() throws SyntaxException, IOException, SecurityException, NoSuchMethodException{
-		String program = "(define bar (lambda (a b) (local (define foo asList) (foo a b))))" +
+	public void testFunctionRedefinitionInLambda() throws SyntaxException, IOException, SecurityException, NoSuchMethodException{
+		String program = "(define bar (lambda (a b) (local (define foo (lambda (c d) (asList c d))) (foo a b))))" +
 				"(bar 1 2)";
 		Parser parser = Parser.standardParser();
 		parser.setFlags(Parser.BEGIN|Parser.END|Parser.COMMENTS);
@@ -60,14 +60,14 @@ public class InterpreterTest {
 
 			@Override
 			public Object apply(Object[] arg) throws Exception {
-				return Integer.valueOf((String) arg[0]) + Integer.valueOf((String) arg[1]);
+				return  (Double)arg[0] + (Double)arg[1];
 			}
 			
 		});
 		interp.addMethod("asList", new ReflectiveFun<List<?>>("asList",Arrays.class,Object[].class));
 		
 		Object result = parser.parse(new StringReader(program));
-		assertTrue(result instanceof List);
+		assertTrue("Function redefinition failed", result instanceof List);
 
 	}
 

@@ -91,7 +91,12 @@ public class ReflectiveFun<ResultType> implements
 						parameterTypes[parameterTypes.length - 1]
 								.getComponentType(), varargs.length);
 				for (int i = 0; i < varargs.length; i++) {
+					try{
 					Array.set(arr, i, varargs[i]);
+					}catch(IllegalArgumentException e){
+						System.err.println("Array element type mismatch: ");
+						System.err.println(varargs[i]);
+					}
 				}
 				t_args[t_args.length - 1] = arr;
 				args = t_args;

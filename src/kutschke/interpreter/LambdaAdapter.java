@@ -156,7 +156,7 @@ public class LambdaAdapter implements Interpreter {
 																	// issues
 				// btw. this is also a little optimization
 				//FIXME this makes internal overriding impossible
-				if (t instanceof String && temp != null)
+				if (lastWasOpenBracket && t instanceof String && temp != null)
 					builder.token(temp);
 				else
 					builder.token(t);
