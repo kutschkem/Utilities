@@ -9,7 +9,7 @@ package kutschke.higherClass;
  * @param <ArgType> the type of the Arguments
  * @param <ResultType> the type of the results
  */
-public interface GeneralOperation<ArgType, ResultType> extends
-		Lambda<ArgType[], ResultType> {
+public interface GeneralOperation<ArgType, ResultType, ExceptionType extends Exception> extends
+		Lambda<ArgType[], ResultType,ExceptionType> {
 
 }

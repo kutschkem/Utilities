@@ -4,15 +4,20 @@ Bundle-Name: Utility
 Bundle-SymbolicName: Utility
 Bundle-Version: 1.0.0
 Export-Package: TestClasses,
- interfaces,
  kutschke.Automata,
  kutschke.generalStreams,
- kutschke.generalStreams.iterators,
+ kutschke.generalStreams.iterators;uses:="kutschke.generalStreams,kutschke.higherClass",
  kutschke.higherClass,
  kutschke.higherClass.Tests,
- kutschke.interpreter,
- kutschke.numberStreams,
- kutschke.utility
+ kutschke.interfaces,
+ kutschke.interpreter;
+  uses:="kutschke.interpreter.abstractSyntax,
+   kutschke.generalStreams.iterators,
+   kutschke.generalStreams,
+   kutschke.interfaces,
+   kutschke.higherClass",
+ kutschke.numberStreams;uses:="kutschke.generalStreams",
+ kutschke.utility;uses:="kutschke.higherClass"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.junit4;bundle-version="4.3.1",
  javax.servlet;bundle-version="2.4.0"

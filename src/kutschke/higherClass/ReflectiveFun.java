@@ -16,7 +16,7 @@ import java.util.Arrays;
  * @param <ResultType>
  */
 public class ReflectiveFun<ResultType> implements
-		GeneralOperation<Object, ResultType> {
+		GeneralOperation<Object, ResultType,Exception> {
 
 	protected Method method;
 	private Object bound;
@@ -153,10 +153,10 @@ public class ReflectiveFun<ResultType> implements
 		return e2;
 	}
 
-	public <T> Lambda<T, ResultType> singleParameterAdapter(Class<T> argType) {
+	public <T> Lambda<T, ResultType, Exception> singleParameterAdapter(Class<T> argType) {
 		if (method.getParameterTypes().length == 1)
 			if (method.getParameterTypes()[0].isAssignableFrom(argType))
-				return new Lambda<T, ResultType>() {
+				return new Lambda<T, ResultType, Exception>() {
 
 					@Override
 					public ResultType apply(T arg) throws Exception {

@@ -10,7 +10,7 @@ package kutschke.higherClass;
  * @param <ResultType>
  *            the type of the result
  */
-public interface Lambda<ArgType, ResultType> {
+public interface Lambda<ArgType, ResultType, ExceptionType extends Exception> {
 
 	/**
 	 * apply the encapsulated Operation on the Argument
@@ -19,6 +19,6 @@ public interface Lambda<ArgType, ResultType> {
 	 *            the Argument
 	 * @return the result of the Operation
 	 */
-	public ResultType apply(ArgType arg) throws Exception;
+	public ResultType apply(ArgType arg) throws ExceptionType;
 
 }

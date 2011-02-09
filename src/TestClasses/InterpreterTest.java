@@ -56,7 +56,7 @@ public class InterpreterTest {
 		
 		interp.addMethod("define", new ReflectiveFun<Void>("addMethod",Interpreter.class,String.class, GeneralOperation.class).setBound(interp));
 		
-		interp.addMethod("foo", new GeneralOperation<Object,Object>(){
+		interp.addMethod("foo", new GeneralOperation<Object,Object,Exception>(){
 
 			@Override
 			public Object apply(Object[] arg) throws Exception {

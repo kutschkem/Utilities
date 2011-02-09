@@ -59,7 +59,7 @@ public interface Interpreter {
 	public void pushScope();
 	public void popScope();
 	
-	public Binding<Object,?> addMethod(String name, GeneralOperation<Object, ?> method);
-	public GeneralOperation<Object, ?> getMapping(String methodName);
+	public Binding<Object,?> addMethod(String name, GeneralOperation<Object, ?,?> method);
+	public GeneralOperation<Object, ?,?> getMapping(String methodName);
 
 }

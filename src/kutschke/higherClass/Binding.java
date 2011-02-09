@@ -8,12 +8,12 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
-public class Binding<ArgType, ResultType> implements GeneralOperation<ArgType, ResultType> {
+public class Binding<ArgType, ResultType> implements GeneralOperation<ArgType, ResultType, Exception> {
 
-	protected GeneralOperation<ArgType,? extends ResultType> bound;
+	protected GeneralOperation<ArgType,? extends ResultType, ? extends Exception> bound;
 	protected TreeMap<Integer,ArgType> bindings = new TreeMap<Integer,ArgType>();
 	
-	public Binding(GeneralOperation<ArgType, ? extends ResultType> inner){
+	public Binding(GeneralOperation<ArgType, ? extends ResultType,? extends Exception> inner){
 		bound = inner;
 	}
 	
@@ -26,7 +26,7 @@ public class Binding<ArgType, ResultType> implements GeneralOperation<ArgType, R
 		return Collections.unmodifiableSortedMap(bindings);
 	}
 	
-	public GeneralOperation<ArgType,? extends ResultType> getInner(){
+	public GeneralOperation<ArgType,? extends ResultType, ? extends Exception> getInner(){
 		return bound;
 	}
 	

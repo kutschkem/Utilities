@@ -5,7 +5,7 @@ import java.lang.reflect.Constructor;
 import java.util.Arrays;
 
 public class ConstructorFun<ResultType> implements
-		GeneralOperation<Object, ResultType> {
+		GeneralOperation<Object, ResultType,Exception> {
 
 	private Constructor<ResultType> cons;
 

@@ -187,12 +187,12 @@ public class LambdaAdapter implements Interpreter {
 
 	@Override
 	public Binding<Object, ?> addMethod(String name,
-			GeneralOperation<Object, ?> method) {
+			GeneralOperation<Object, ?,?> method) {
 		return delegate.addMethod(name, method);
 	}
 
 	@Override
-	public GeneralOperation<Object, ?> getMapping(String methodName) {
+	public GeneralOperation<Object, ?,?> getMapping(String methodName) {
 		return delegate.getMapping(methodName);
 	}
 

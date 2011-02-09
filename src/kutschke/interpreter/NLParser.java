@@ -59,7 +59,7 @@ public class NLParser {
 	protected List<Character> ordinary = new ArrayList<Character>();
 	protected List<Character> wordchars = new ArrayList<Character>();
 	protected List<Character> quoteChars = new ArrayList<Character>();
-	private Map<String, Lambda<String, ?>> converters = new LinkedHashMap<String, Lambda<String, ?>>();
+	private Map<String, Lambda<String, ?,?>> converters = new LinkedHashMap<String, Lambda<String, ?,?>>();
 
 	public NLParser() {
 	}
@@ -135,6 +135,8 @@ public class NLParser {
 
 							}
 					}
+					if(openedBracket)
+						interpreter.closeBracket();
 					if (brackets > 0)
 						throw new SyntaxException("Too many closing brackets");
 					if (tokenizer.ttype == TT_EOF && (flags & END) != 0)
@@ -169,7 +171,7 @@ public class NLParser {
 		quoteChars.add(c);
 	}
 
-	public void addConverter(String pattern, Lambda<String, ?> converter) {
+	public void addConverter(String pattern, Lambda<String, ?,?> converter) {
 		converters.put(pattern, converter);
 	}
 

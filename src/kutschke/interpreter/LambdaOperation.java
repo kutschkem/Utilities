@@ -7,7 +7,7 @@ import kutschke.higherClass.GeneralOperation;
 import kutschke.higherClass.ReflectiveFun;
 import kutschke.interpreter.abstractSyntax.AbSParser;
 
-public class LambdaOperation implements GeneralOperation<Object, Object> {
+public class LambdaOperation implements GeneralOperation<Object, Object,Exception> {
 
 	AbSParser parser;
 	List<Object> params;

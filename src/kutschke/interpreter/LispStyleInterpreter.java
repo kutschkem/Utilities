@@ -1,6 +1,5 @@
 package kutschke.interpreter;
 
-import interfaces.Optimizable;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -14,6 +13,7 @@ import kutschke.higherClass.Binding;
 import kutschke.higherClass.ConstructorFun;
 import kutschke.higherClass.GeneralOperation;
 import kutschke.higherClass.ReflectiveFun;
+import kutschke.interfaces.Optimizable;
 import kutschke.interpreter.abstractSyntax.AbSParser;
 
 /**
@@ -45,21 +45,21 @@ public class LispStyleInterpreter implements Interpreter,
 		Optimizable<LispStyleInterpreter> {
 
 	protected Stack<List<Object>> methodStack = new Stack<List<Object>>();
-	protected Deque<Map<String, GeneralOperation<Object, ?>>> scopes = new ArrayDeque<Map<String, GeneralOperation<Object, ?>>>();
+	protected Deque<Map<String, GeneralOperation<Object, ?,?>>> scopes = new ArrayDeque<Map<String, GeneralOperation<Object, ?,?>>>();
 	protected List<Object> actual = null;
 	protected boolean DEBUG = false;
 
 	public Binding<Object, ?> addMethod(String name,
-			GeneralOperation<Object, ?> method) {
+			GeneralOperation<Object, ?,?> method) {
 		if (scopes.isEmpty())
-			scopes.push(new HashMap<String, GeneralOperation<Object, ?>>());
+			scopes.push(new HashMap<String, GeneralOperation<Object, ?,?>>());
 		Binding<Object, ?> binding = new SealableBinding(method);
 		scopes.peek().put(name, binding);
 		return binding;
 	}
 
-	public GeneralOperation<Object, ?> getMapping(String methodName) {
-		for (Map<String, GeneralOperation<Object, ?>> scope : this.scopes) {
+	public GeneralOperation<Object, ?,?> getMapping(String methodName) {
+		for (Map<String, GeneralOperation<Object, ?,?>> scope : this.scopes) {
 			if (scope.containsKey(methodName))
 				return scope.get(methodName);
 		}
@@ -67,9 +67,9 @@ public class LispStyleInterpreter implements Interpreter,
 	}
 
 	public LispStyleInterpreter optimize() {
-		for (Map<String, GeneralOperation<Object, ?>> map : scopes) {
+		for (Map<String, GeneralOperation<Object, ?,?>> map : scopes) {
 			for (String method : map.keySet()) {
-				GeneralOperation<Object, ?> op = map.get(method);
+				GeneralOperation<Object, ?,?> op = map.get(method);
 				if (op instanceof SealableBinding) {
 					SealableBinding _op = (SealableBinding) op;
 					_op.seal();
@@ -89,9 +89,9 @@ public class LispStyleInterpreter implements Interpreter,
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object closeBracket() throws SyntaxException {
-		GeneralOperation<Object, ?> method;
+		GeneralOperation<Object, ?,?> method;
 		if (actual.get(0) instanceof GeneralOperation) {
-			method = (GeneralOperation<Object, ?>) actual.get(0);
+			method = (GeneralOperation<Object, ?,?>) actual.get(0);
 		} else
 			method = getMapping(actual.get(0).toString());
 		if (method == null)
@@ -136,7 +136,7 @@ public class LispStyleInterpreter implements Interpreter,
 	}
 	
 	public void pushScope(){
-		scopes.push(new HashMap<String,GeneralOperation<Object,?>>());
+		scopes.push(new HashMap<String,GeneralOperation<Object,?,?>>());
 	}
 	
 	public void popScope(){

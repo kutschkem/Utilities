@@ -26,7 +26,7 @@ final class SealableBinding extends Binding<Object,Object>{
 		return sealed;
 	}
 	
-	public SealableBinding(GeneralOperation<Object, ? extends Object> inner) {
+	public SealableBinding(GeneralOperation<Object, ?,?> inner) {
 		super(inner);
 	}
 	

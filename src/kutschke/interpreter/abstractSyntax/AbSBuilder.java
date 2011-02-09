@@ -70,13 +70,13 @@ public class AbSBuilder implements Interpreter {
 
 	@Override
 	public Binding<Object, ?> addMethod(String name,
-			GeneralOperation<Object, ?> method) {
+			GeneralOperation<Object, ?,?> method) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public GeneralOperation<Object, ?> getMapping(String methodName) {
+	public GeneralOperation<Object, ?,?> getMapping(String methodName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
