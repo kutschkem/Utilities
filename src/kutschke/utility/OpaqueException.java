@@ -9,6 +9,7 @@ import java.io.PrintWriter;
  * @author Michael
  *
  */
+@SuppressWarnings("serial")
 public class OpaqueException extends RuntimeException {
 
 	public OpaqueException(Throwable cause) {

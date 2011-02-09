@@ -6,6 +6,7 @@ import java.util.ListIterator;
 import kutschke.higherClass.GeneralOperation;
 import kutschke.interpreter.SyntaxException;
 
+@SuppressWarnings("serial")
 public class GenericS_Exp extends LinkedList<Object> implements S_Exp {
 
 	
@@ -35,6 +36,7 @@ public class GenericS_Exp extends LinkedList<Object> implements S_Exp {
 		return this;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Object evaluate() throws SyntaxException {
 		
@@ -50,7 +52,7 @@ public class GenericS_Exp extends LinkedList<Object> implements S_Exp {
 		Object method = this.removeFirst();
 		if(method instanceof GeneralOperation){
 			try {
-				return ((GeneralOperation) method).apply(this.toArray());
+				return ((GeneralOperation<Object,?,?>) method).apply(this.toArray());
 			} catch (Exception e) {
 				throw new SyntaxException(e);
 			}

@@ -1,5 +1,6 @@
 package kutschke.interpreter;
 
+@SuppressWarnings("serial")
 public class SyntaxException extends Exception {
 
 	public SyntaxException() {
