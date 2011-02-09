@@ -1,4 +1,4 @@
-package interfaces;
+package kutschke.interfaces;
 
 public interface Observer<T> {
 

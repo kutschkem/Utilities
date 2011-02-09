@@ -41,5 +41,16 @@ public class MultiIterator<T> implements Iterator<T> {
 		currentIterator.remove();
 
 	}
+	
+	public static <T> Iterable<T> iterable(final Iterable<? extends Iterable<? extends T>> collection){
+		return new Iterable<T>(){
+
+			@Override
+			public Iterator<T> iterator() {
+				return new MultiIterator<T>(collection);
+			}
+			
+		};
+	}
 
 }
