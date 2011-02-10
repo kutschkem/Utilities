@@ -11,10 +11,12 @@ import org.junit.Test;
 
 import kutschke.higherClass.GeneralOperation;
 import kutschke.higherClass.ReflectiveFun;
+import kutschke.interpreter.Identity;
 import kutschke.interpreter.Interpreter;
 import kutschke.interpreter.LambdaAdapter;
 import kutschke.interpreter.LispStyleInterpreter;
 import kutschke.interpreter.LocalAdapter;
+import kutschke.interpreter.NLParser;
 import kutschke.interpreter.Parser;
 import kutschke.interpreter.SyntaxException;
 import kutschke.interpreter.abstractSyntax.AbSParser;
@@ -69,6 +71,22 @@ public class InterpreterTest {
 		Object result = parser.parse(new StringReader(program));
 		assertTrue("Function redefinition failed", result instanceof List);
 
+	}
+	
+	
+	@Test
+	public void testNLParserNumberParsing() throws IOException{
+		NLParser Parser = new NLParser();
+		LispStyleInterpreter inter = new LispStyleInterpreter();
+		
+		String program = "id 5 //lala";
+		inter.addMethod("id", new Identity<Object>());
+		Parser.setInterpreter(inter);
+		Parser.setFlags(NLParser.COMMENTS);
+		inter.setDEBUG(true);
+		Object o = Parser.stream(new StringReader(program)).read();
+		assertTrue("Number got parsed " + o.getClass() + " " + o,o instanceof String);
+		
 	}
 
 }
