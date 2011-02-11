@@ -20,25 +20,118 @@ import kutschke.higherClass.Lambda;
 import kutschke.utility.OpaqueException;
 
 public class NLParser {
-	
+
+	protected class ProgramStream extends GeneralInStream<Object> {
+		private final Reader in;
+		StreamTokenizer tokenizer;
+		final int flags = getFlags();
+		boolean begun = false;
+		{
+			tokenizer.resetSyntax();
+			tokenizer.wordChars('A', 'Z');
+			tokenizer.wordChars('a', 'z');
+			tokenizer.whitespaceChars('\0', ' ');
+			tokenizer.wordChars('0', '9');	//don't parse numbers
+			if ((getFlags() & COMMENTS) != 0) {
+				tokenizer.slashSlashComments(true);
+				tokenizer.slashStarComments(true);
+			}
+
+			for (Character c : ordinary) {
+				tokenizer.ordinaryChar(c);
+			}
+			for (Character c : wordchars) {
+				tokenizer.wordChars(c, c);
+			}
+			for (Character c : quoteChars) {
+				tokenizer.quoteChar(c);
+			}
+			tokenizer.eolIsSignificant(true);
+
+		}
+
+		protected ProgramStream(Reader in) {
+			this.in = in;
+			tokenizer = new StreamTokenizer(in);
+		}
+
+		@Override
+		public Object read() throws IOException {
+			Object result = ProgramStreamIterator.NULL;
+			boolean lastWasNL = false;
+			boolean openedBracket = false;
+
+			try {
+				if (!begun && (flags & BEGIN) != 0) {
+					interpreter.begin();
+					begun = true;
+				}
+				loop: while (tokenizer.nextToken() != TT_EOF) {
+					switch (tokenizer.ttype) {
+					case TT_NUMBER:
+						throw new RuntimeException("Bug: Tokenizer should not parse numbers");
+					case TT_WORD:
+						lastWasNL = false;
+						if (!openedBracket) {
+							interpreter.openBracket();
+							openedBracket = true;
+						}
+						interpreter.token(convert(tokenizer.sval));
+						break;
+					case TT_EOL:
+						if (!lastWasNL)
+							result = interpreter.closeBracket();
+						lastWasNL = true;
+						openedBracket = false;
+						if (result != ProgramStreamIterator.NULL)
+							break loop;
+						break;
+					default:
+						lastWasNL = false;
+						interpreter.special((char) tokenizer.ttype);
+
+					}
+				}
+				if (openedBracket)
+					result = interpreter.closeBracket();
+				if (tokenizer.ttype == TT_EOF && (flags & END) != 0)
+					interpreter.end();
+			} catch (SyntaxException se) {
+				IOException io = new IOException(
+						"Exception occured while interpreting line "
+								+ tokenizer.lineno(), se);
+				io.setStackTrace(new StackTraceElement[] {}); // The stack trace is not helpful
+				throw io;
+			}
+			return result;
+		}
+
+		@Override
+		public void close() throws IOException {
+			in.close();
+		}
+	}
+
 	/**
-	 * this Iterator differs from it's superclass in permitting null values in the Stream.
-	 * Streams that are supposed to be used with this Iterator should return 
-	 * ProgramStreamIterator.NULL to mark their end. Try not to have any program return this
-	 * as top-level return value, as it will mess up things
+	 * this Iterator differs from it's superclass in permitting null values in
+	 * the Stream. Streams that are supposed to be used with this Iterator
+	 * should return ProgramStreamIterator.NULL to mark their end. Try not to
+	 * have any program return this as top-level return value, as it will mess
+	 * up things
+	 * 
 	 * @author Michael
-	 *
+	 * 
 	 */
-	public static class ProgramStreamIterator extends StreamIterator<Object>{
+	public static class ProgramStreamIterator extends StreamIterator<Object> {
 
 		public static final Object NULL = new Object();
-		
+
 		public ProgramStreamIterator(InStream<Object> str) {
 			super(str);
 		}
-		
+
 		@Override
-		public boolean hasNext(){
+		public boolean hasNext() {
 			try {
 				buffer = inStr.read();
 				checked = true;
@@ -47,7 +140,7 @@ public class NLParser {
 			}
 			return buffer != NULL;
 		}
-		
+
 	}
 
 	public final static int BEGIN = 1;
@@ -59,7 +152,7 @@ public class NLParser {
 	protected List<Character> ordinary = new ArrayList<Character>();
 	protected List<Character> wordchars = new ArrayList<Character>();
 	protected List<Character> quoteChars = new ArrayList<Character>();
-	private Map<String, Lambda<String, ?,?>> converters = new LinkedHashMap<String, Lambda<String, ?,?>>();
+	private Map<String, Lambda<String, ?, ?>> converters = new LinkedHashMap<String, Lambda<String, ?, ?>>();
 
 	public NLParser() {
 	}
@@ -69,94 +162,7 @@ public class NLParser {
 	}
 
 	public InStream<Object> stream(final Reader in) {
-		return new GeneralInStream<Object>() {
-			StreamTokenizer tokenizer = new StreamTokenizer(in);
-			final int flags = getFlags();
-			boolean begun = false;
-
-			{
-				if ((getFlags() & COMMENTS) == 0) {
-					tokenizer.slashSlashComments(false);
-					tokenizer.slashStarComments(false);
-				}
-
-				for (Character c : ordinary) {
-					tokenizer.ordinaryChar(c);
-				}
-				for (Character c : wordchars) {
-					tokenizer.wordChars(c, c);
-				}
-				for (Character c : quoteChars) {
-					tokenizer.quoteChar(c);
-				}
-				tokenizer.eolIsSignificant(true);
-
-			}
-
-			@Override
-			public Object read() throws IOException {
-				Object result = ProgramStreamIterator.NULL;
-				int brackets = 0;
-				boolean lastWasNL = false;
-				boolean openedBracket = false;
-
-				try {
-					if (!begun && (flags & BEGIN) != 0) {
-						interpreter.begin();
-						begun = true;
-					}
-					while (tokenizer.nextToken() != TT_EOF) {
-							switch (tokenizer.ttype) {
-							case TT_NUMBER:
-								lastWasNL = false;
-								if(! openedBracket){
-									interpreter.openBracket();
-									openedBracket = true;
-								}
-								interpreter.token(convert(String.valueOf(tokenizer.nval)));
-								break;
-							case TT_WORD:
-								lastWasNL = false;
-								if(! openedBracket){
-									interpreter.openBracket();
-									openedBracket = true;
-								}
-								interpreter.token(convert(tokenizer.sval));
-								break;
-							case TT_EOL:
-								if(! lastWasNL)
-									result = interpreter.closeBracket();
-								lastWasNL = true;
-								openedBracket = false;
-								break;
-							default:
-								lastWasNL = false;
-								interpreter.special((char) tokenizer.ttype);
-
-							}
-					}
-					if(openedBracket)
-						interpreter.closeBracket();
-					if (brackets > 0)
-						throw new SyntaxException("Too many closing brackets");
-					if (tokenizer.ttype == TT_EOF && (flags & END) != 0)
-						interpreter.end();
-				} catch (SyntaxException se) {
-					IOException io = new IOException(
-							"Exception occured while interpreting line "
-							+ tokenizer.lineno(), se);
-					io.setStackTrace(new StackTraceElement[]{});
-					throw io;
-				}
-				return result;
-			}
-
-			@Override
-			public void close() throws IOException {
-				in.close();
-			}
-
-		};
+		return new ProgramStream(in);
 	}
 
 	public void ordinaryChar(char c) {
@@ -171,7 +177,7 @@ public class NLParser {
 		quoteChars.add(c);
 	}
 
-	public void addConverter(String pattern, Lambda<String, ?,?> converter) {
+	public void addConverter(String pattern, Lambda<String, ?, ?> converter) {
 		converters.put(pattern, converter);
 	}
 
@@ -186,14 +192,14 @@ public class NLParser {
 	public Object parse(Reader in) throws SyntaxException, IOException {
 		ProgramStreamIterator streamIt = new ProgramStreamIterator(stream(in));
 		Object result = null;
-		try{
-		while (streamIt.hasNext()) {
-			result = streamIt.next();
-		}
-		}catch(OpaqueException e){ // unbox relevant Exceptions
-			if(e.getCause() instanceof SyntaxException)
+		try {
+			while (streamIt.hasNext()) {
+				result = streamIt.next();
+			}
+		} catch (OpaqueException e) { // unbox relevant Exceptions
+			if (e.getCause() instanceof SyntaxException)
 				throw (SyntaxException) e.getCause();
-			if(e.getCause() instanceof IOException)
+			if (e.getCause() instanceof IOException)
 				throw (IOException) e.getCause();
 			throw e;
 		}
@@ -235,5 +241,5 @@ public class NLParser {
 	public int getFlags() {
 		return flags;
 	}
-	
+
 }

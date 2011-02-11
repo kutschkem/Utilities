@@ -53,9 +53,6 @@ public class RadixTest {
 		
 		Collections.sort(lst);
 		assertArrayEquals(lst.toArray(),array);
-		
-		String log1 = Testing.getBufferString();
-		Testing.clearBuffer();
 				
 		RadixSort.sort(lst2, new NoThrowLambda <Double,Long>(){
 
@@ -65,14 +62,7 @@ public class RadixTest {
 			}
 			
 		});
-		
-		String log2 = Testing.getBufferString();
-		
-		System.out.println( log1.equals(log2));
-				
-		Testing.printarray((Double[]) lst.toArray());
-		Testing.printarray((Double[])lst2.toArray());
-		Testing.flushBuffer("log.txt");
+
 		assertArrayEquals(lst.toArray(),lst2.toArray());
 		
 	}
@@ -104,9 +94,6 @@ public class RadixTest {
 		Collections.sort(lst);
 		assertArrayEquals(lst.toArray(), array);
 		
-		Testing.printarray(lst.toArray());
-		Testing.printarray(array);
-		
 		RadixSort.sort(lst2, new NoThrowLambda<Double,Long>(){
 
 			@Override
@@ -116,15 +103,7 @@ public class RadixTest {
 			
 		});
 		
-		Testing.printarray(lst2.toArray());
-		
-		Testing.printarraytoBuf(lst.toArray());
-		String str1 = Testing.getBufferString();
-		Testing.clearBuffer();
-		Testing.printarraytoBuf(lst2.toArray());
-		String str2 = Testing.getBufferString();
-		Testing.clearBuffer();
-		assertEquals(str1, str2);
+		assertArrayEquals(lst2.toArray(), array);
 
 		
 	}
