@@ -6,7 +6,7 @@ import java.io.OutputStream;
 
 /**
  * use this to filter specific chars out of a stream. This means they won't be in it
- * afterwards. Especially usefull to filter out null characters.
+ * afterwards. Especially useful to filter out null characters.
  * @author Michael
  *
  */
