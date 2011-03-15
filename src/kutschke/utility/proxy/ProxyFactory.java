@@ -1,10 +1,13 @@
 package kutschke.utility.proxy;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class ProxyFactory {
@@ -40,8 +43,7 @@ public class ProxyFactory {
 					public Object invoke(Object proxy, Method method,
 							Object[] args) throws Throwable {
 						Method m = methods.get(new MethodDescriptor(method));
-						if (m != null)
-							return m.invoke(adapter, args);
+						if (m != null) return m.invoke(adapter, args);
 						return method.invoke(adaptee, args);
 					}
 
@@ -52,10 +54,15 @@ public class ProxyFactory {
 	 * build a delegator proxy for one specific method in the target class.
 	 * 
 	 * @param <T>
-	 * @param target the target class
-	 * @param delegateSrc the method in the target class that gets mapped to delegateDest
+	 * @param target
+	 *            the target interface
+	 * @param delegateSrc
+	 *            the method in the target class that gets mapped to
+	 *            delegateDest
 	 * @param delegator
-	 * @param delegateDest the method name of the method that actually gets called in the delegator
+	 * @param delegateDest
+	 *            the method name of the method that actually gets called in the
+	 *            delegator
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
@@ -69,8 +76,7 @@ public class ProxyFactory {
 
 					{
 						for (Method m : delegator.getClass().getMethods())
-							if (m.getName().equals(delegateDest))
-								dlgt = m;
+							if (m.getName().equals(delegateDest)) dlgt = m;
 					}
 
 					@Override
@@ -86,12 +92,96 @@ public class ProxyFactory {
 				});
 	}
 
+	@SuppressWarnings("unchecked")
+	public static <T> T resolveDelegation(Class<T> target, final Object delegator,
+			Class[] interfaces) {
+		final Map<MethodDescriptor, Object> delegateMap = new HashMap<MethodDescriptor, Object>();
+		
+		for(Method m: delegator.getClass().getMethods())
+			delegateMap.put(new MethodDescriptor(m), delegator);
+
+		for (Class interf : interfaces) {
+			for (Method m : interf.getDeclaredMethods()) {
+				delegateMap.put(new MethodDescriptor(m), getDelegate(
+						delegator, interf));
+			}
+		}
+		
+		return (T) Proxy.newProxyInstance(target.getClassLoader(), interfaces, new InvocationHandler(){
+
+			@Override
+			public Object invoke(Object proxy, Method method, Object[] args)
+					throws Throwable {
+				MethodDescriptor desc = new MethodDescriptor(method);
+				if(delegateMap.containsKey(desc))
+					return method.invoke(delegateMap.get(desc), args);
+				else
+					return method.invoke(delegator, args);
+			}
+			
+		});
+	}
+	
+	/**
+	 * finds the topmost delegate implementing or subclassing the given interface / class.
+	 * Note that there should not be more than one Field be annotated as Delegate if possible
+	 * @param <T>
+	 * @param src
+	 * @param clazz
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T getDelegate(Object src, Class<T> clazz){
+		return (T) finddelegate(src, new HashSet<Object>(), clazz);
+	}
+
+	private static Object finddelegate(Object delegator,
+			HashSet<Object> hashSet, Class<?> clazz) {
+		if (hashSet.contains(delegator)) return null;
+		hashSet.add(delegator); //deal with cyclic relationships
+		if (clazz.isAssignableFrom(delegator.getClass()))
+			return delegator;
+		for (Field field : delegator.getClass().getDeclaredFields()) {
+			if (field.isAnnotationPresent(Delegate.class)) {
+				field.setAccessible(true);
+				try {
+					Object result = finddelegate(field.get(delegator), hashSet,
+							clazz);
+					if (result != null) return result;
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
+
+		}
+		for (Method method : delegator.getClass().getMethods()) {
+			if (method.isAnnotationPresent(Delegate.class)) {
+				try {
+					Object result = finddelegate(method.invoke(delegator, new Object[]{}), hashSet,
+							clazz);
+					if (result != null) return result;
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+		}
+		return null;
+	}
+
 	/**
 	 * for a known class, the method descriptor uniquely identifies a method of
 	 * that class
 	 * 
 	 * @author Michael
-	 * 
 	 */
 	public static class MethodDescriptor {
 		private final String name;
@@ -104,15 +194,14 @@ public class ProxyFactory {
 
 		@Override
 		public boolean equals(Object o) {
-			if (!(o instanceof MethodDescriptor))
-				return false;
+			if (!(o instanceof MethodDescriptor)) return false;
 			MethodDescriptor md = (MethodDescriptor) o;
 			return name.equals(md.name) && Arrays.equals(params, md.params);
 		}
 
 		@Override
 		public int hashCode() {
-			return name.hashCode() + 31 * params.hashCode();
+			return name.hashCode() + 31 * Arrays.hashCode(params);
 		}
 	}
 

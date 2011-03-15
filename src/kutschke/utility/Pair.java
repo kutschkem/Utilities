@@ -32,6 +32,7 @@ public class Pair<T1, T2> {
 		o2 = o;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof Pair))
 			return false;
@@ -43,8 +44,14 @@ public class Pair<T1, T2> {
 		return o1 == null ? o2 == null : o1.equals(o2);
 	}
 
+	@Override
 	public String toString() {
 		return "Pair{" + o1 + ", " + o2 + "}";
+	}
+
+	@Override
+	public int hashCode() {
+		return o1.hashCode() * o2.hashCode();
 	}
 
 }
