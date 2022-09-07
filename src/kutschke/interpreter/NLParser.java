@@ -17,7 +17,7 @@ import kutschke.generalStreams.GeneralInStream;
 import kutschke.generalStreams.InStream;
 import kutschke.generalStreams.iterators.StreamIterator;
 import kutschke.higherClass.Lambda;
-import kutschke.utility.OpaqueException;
+import kutschke.utility.TransparentException;
 
 public class NLParser {
 
@@ -136,7 +136,7 @@ public class NLParser {
 				buffer = inStr.read();
 				checked = true;
 			} catch (Exception e) {
-				throw new OpaqueException(e);
+				throw new TransparentException(e);
 			}
 			return buffer != NULL;
 		}
@@ -196,7 +196,7 @@ public class NLParser {
 			while (streamIt.hasNext()) {
 				result = streamIt.next();
 			}
-		} catch (OpaqueException e) { // unbox relevant Exceptions
+		} catch (TransparentException e) { // unbox relevant Exceptions
 			if (e.getCause() instanceof SyntaxException)
 				throw (SyntaxException) e.getCause();
 			if (e.getCause() instanceof IOException)

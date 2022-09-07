@@ -10,9 +10,9 @@ import java.io.PrintWriter;
  *
  */
 @SuppressWarnings("serial")
-public class OpaqueException extends RuntimeException {
+public class TransparentException extends RuntimeException {
 
-	public OpaqueException(Throwable cause) {
+	public TransparentException(Throwable cause) {
 		super(cause);
 		// TODO Auto-generated constructor stub
 	}

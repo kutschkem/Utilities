@@ -21,3 +21,5 @@ Export-Package: TestClasses,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.junit4;bundle-version="4.3.1",
  javax.servlet;bundle-version="2.4.0"
+Bundle-ClassPath: jung-algorithms-2.0.1.jar,
+ .
