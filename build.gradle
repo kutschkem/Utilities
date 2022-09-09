@@ -1,0 +1,24 @@
+plugins {
+    id 'java-library'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+        resources {
+            include 'META-INF/**'
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'net.sf.jung:jung-algorithms:2.0.1'
+    api 'javax.servlet:javax.servlet-api:3.0.1'
+    implementation 'junit:junit:4.10'
+}
